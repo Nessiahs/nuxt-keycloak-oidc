@@ -34,12 +34,15 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest watch",
-    "test:types": "vue-tsc --noEmit && cd playground && vue-tsc --noEmit"
+    "test:types": "vue-tsc --noEmit && cd playground && vue-tsc --noEmit",
+    "prepare": "husky"
   },
   "dependencies": {
     "@nuxt/kit": "^4.0.0"
   },
   "devDependencies": {
+    "@commitlint/cli": "^20.5.0",
+    "@commitlint/config-conventional": "^20.5.0",
     "@nuxt/devtools": "^3.2.4",
     "@nuxt/eslint-config": "^1.15.2",
     "@nuxt/module-builder": "^1.0.2",
@@ -49,6 +52,8 @@
     "changelogen": "^0.6.2",
     "eslint": "^10.1.0",
     "eslint-config-prettier": "^10.1.8",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "nuxt": "^4.4.2",
     "prettier": "^3.8.1",
     "typescript": "~6.0.2",
@@ -57,5 +62,11 @@
   },
   "engines": {
     "node": ">=20.0.0"
+  },
+  "lint-staged": {
+    "*.{ts,js,vue}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
   }
 }
