@@ -41,4 +41,3 @@ export default createConfigForNuxt({
       'no-console': 'off',
     },
   })
-
