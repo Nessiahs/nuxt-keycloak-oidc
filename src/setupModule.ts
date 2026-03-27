@@ -1,6 +1,12 @@
 import type { ModuleOptions } from './types'
 
-export default function setupModule(config: ModuleOptions) {
+type SetupOptions = Omit<ModuleOptions, 'enabled'>
+// Validates and reports the final resolved configuration.
+// This function is intentionally side-effectful (console output + throws)
+// to provide clear feedback during module initialization.
+export default function setupModule(config: SetupOptions) {
+  // Create a sanitized version of the config for logging
+  // (never expose sensitive values like clientSecret)
   const safeConfig = {
     url: config.url || '∅',
     realm: config.realm || '∅',
@@ -10,10 +16,14 @@ export default function setupModule(config: ModuleOptions) {
 
   const missing: string[] = []
 
+  // Collect missing required fields
+  // These are critical for OIDC to function correctly
   if (!config.url) missing.push('url')
   if (!config.realm) missing.push('realm')
   if (!config.clientId) missing.push('clientId')
 
+  // Fail fast if required configuration is incomplete
+  // Include sanitized config to improve debugging experience
   if (missing.length) {
     throw new Error(
       `[nuxt-keycloak] Missing required config: ${missing.join(', ')}\n` +
@@ -21,12 +31,17 @@ export default function setupModule(config: ModuleOptions) {
     )
   }
 
+  // Log resolved (non-sensitive) configuration for visibility
+  // Helps debugging especially when ENV overrides are involved
   console.info('[nuxt-keycloak] Resolved configuration:', {
     url: config.url,
     realm: config.realm,
     clientId: config.clientId,
   })
 
+  // Inform about security model based on selected mode
+  // protect-selected → only explicit routes are protected (less secure)
+  // protect-all → everything is protected by default (recommended)
   if (config.mode === 'protect-selected') {
     console.warn(
       '⚠️ [nuxt-keycloak] protect-selected mode active\n' +
@@ -40,6 +55,8 @@ export default function setupModule(config: ModuleOptions) {
     )
   }
 
+  // Warn if running without a client secret
+  // This typically means a public client is used (less secure)
   if (!config.clientSecret) {
     console.warn(
       '⚠️ [nuxt-keycloak] No clientSecret configured\n' +
@@ -57,10 +74,13 @@ export default function setupModule(config: ModuleOptions) {
         ),
     )
   } else {
+    // Log masked clientSecret to confirm presence without leaking it
     console.info(`🔐 [nuxt-keycloak] clientSecret configured (${maskSecret(config.clientSecret)})`)
   }
 }
 
+// Masks sensitive values before logging
+// Keeps last 8 characters hidden (or fully masked if shorter)
 function maskSecret(secret: string): string {
   if (secret.length <= 8) {
     return '*'.repeat(secret.length)

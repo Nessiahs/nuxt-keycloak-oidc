@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import setupModule from '../src/setupModule'
 
-// --- helpers ---
+// Helper to generate a valid base configuration
+// Allows overriding specific fields to test edge cases
 function validConfig(overrides: any = {}) {
   return {
     url: 'http://localhost:8080',
@@ -16,6 +17,8 @@ describe('setupModule', () => {
   let infoSpy: any
   let warnSpy: any
 
+  // Mock console methods to verify logging behavior
+  // without polluting test output
   beforeEach(() => {
     infoSpy = vi.spyOn(console, 'info').mockImplementation(() => {})
     warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
@@ -130,6 +133,7 @@ describe('setupModule', () => {
     ).toThrow(/url, realm, clientId/)
   })
 
+  // Ensure sensitive data (clientSecret) is never exposed in logs
   it('does not log clientSecret value directly (security)', () => {
     setupModule(validConfig({ clientSecret: 'verysecretvalue' }))
 
@@ -138,6 +142,7 @@ describe('setupModule', () => {
     expect(calls).not.toContain('verysecretvalue')
   })
 
+  // Ensure module always produces some observable output for debugging
   it('always logs something (observability)', () => {
     setupModule(validConfig())
 

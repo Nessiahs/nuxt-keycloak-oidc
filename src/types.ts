@@ -5,8 +5,6 @@ export interface ModuleOptions {
   clientId?: string
   clientSecret?: string
   mode?: 'protect-all' | 'protect-selected'
-  protectedRoutes?: string[]
-  publicRoutes?: string[]
 }
 
 declare module '@nuxt/schema' {
