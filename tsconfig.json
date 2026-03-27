@@ -6,7 +6,8 @@
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "types": ["node"]
+    "types": ["node", "nuxt"],
+    "declaration": true
   },
   "exclude": ["dist", "node_modules", "playground"]
 }
