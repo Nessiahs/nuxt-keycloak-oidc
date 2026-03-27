@@ -43,7 +43,12 @@ coverage
 
 # Intellij idea
 *.iml
-.idea
+.idea/*
+!.idea/codeStyles
+!.idea/inspectionProfiles
+
+
+.playground
 
 # OSX
 .DS_Store
