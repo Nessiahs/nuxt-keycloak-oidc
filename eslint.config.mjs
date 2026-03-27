@@ -22,3 +22,23 @@ export default createConfigForNuxt({
       'vue/multi-word-component-names': 'off',
     },
   })
+  .append({
+    files: ['**/*.test.ts', '**/*.spec.ts'],
+    rules: {
+      // erlaubt gezieltes any für Mocks
+      '@typescript-eslint/no-explicit-any': 'off',
+
+      // Mocks / spies haben oft unused args
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
+
+      // Tests brauchen oft flexible types
+      '@typescript-eslint/explicit-module-boundary-types': 'off',
+
+      // console ist in tests ok
+      'no-console': 'off',
+    },
+  })
+
