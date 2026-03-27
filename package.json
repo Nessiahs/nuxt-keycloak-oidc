@@ -40,7 +40,8 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@nuxt/kit": "^4.0.0"
+    "@nuxt/kit": "^4.0.0",
+    "jose": "^6.2.2"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.5.0",
