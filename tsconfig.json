@@ -7,7 +7,10 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "types": ["node", "nuxt"],
-    "declaration": true
+    "declaration": true,
+    "paths": {
+      "#app": ["./node_modules/nuxt/dist/app"]
+    }
   },
   "exclude": ["dist", "node_modules", "playground"]
 }
