@@ -3,3 +3,8 @@ dist
 .nuxt
 .playground
 coverage
+.github
+*.json
+*.md
+*.yml
+*.config.ts
