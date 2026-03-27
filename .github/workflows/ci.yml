@@ -13,8 +13,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout
+        uses: ./.github/actions/checkout
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
 
       - name: Lint
-        shell: bash
-        run: |
-          echo "later more"
+        run: npm run lint
+
+      - name: Check formatting (prettier)
+        run: npm run format:check
+
+      - name: run tests
+        run: npm test
+
