@@ -51,13 +51,16 @@ runs:
     - name: Resolve current branch
       id: context
       shell: bash
+      env:
+        EVENT_NAME: ${{ github.event_name }}
+        PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
       run: |
         set -e
 
-        if [[ "${{ github.event_name }}" == pull_request* ]]; then
-          echo "branch=${{ github.event.pull_request.head.ref }}" >> "$GITHUB_OUTPUT"
+        if [[ "$EVENT_NAME" == pull_request* ]]; then
+          echo "branch=$PR_HEAD_REF" >> "$GITHUB_OUTPUT"
         else
-          echo "branch=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          echo "branch=$GITHUB_REF_NAME" >> "$GITHUB_OUTPUT"
         fi
 
     - name: Checkout or create branch

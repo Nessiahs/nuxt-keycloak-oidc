@@ -8,9 +8,9 @@ export default function setupModule(config: SetupOptions) {
   // Create a sanitized version of the config for logging
   // (never expose sensitive values like clientSecret)
   const safeConfig = {
-    url: config.url || '∅',
-    realm: config.realm || '∅',
-    clientId: config.clientId || '∅',
+    url: config.url ?? '∅',
+    realm: config.realm ?? '∅',
+    clientId: config.clientId ?? '∅',
     clientSecret: config.clientSecret ? '***' : '∅',
   }
 
