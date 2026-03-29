@@ -1,14 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { setKeycloakConfig } from './utils/setKeycloakConfig'
 
-// --- mock modules ---
-vi.mock('#app', () => ({
-  useRuntimeConfig: () => ({
-    keycloak: {
-      clientId: 'test-client',
-    },
-  }),
-}))
+// --- HOISTED MOCKS ---
+// eslint-disable-next-line no-empty-pattern
+const {} = vi.hoisted(() => ({}))
 
+// --- MODULE MOCKS ---
 vi.mock('../src/runtime/utils/keycloakDiscovery', () => ({
   getKeycloakDiscovery: vi.fn(),
 }))
@@ -34,12 +31,14 @@ describe('auth login handler', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
 
-    // --- dynamic imports AFTER mocks ---
+    // 🔥 config reset (public client by default)
+    setKeycloakConfig({
+      clientId: 'test-client',
+    })
+
     const discoveryModule = await import('../src/runtime/utils/keycloakDiscovery')
-
     const h3 = await import('h3')
-
-    const handlerModule = await import('../src/runtime/server/api/_oicd/login.get')
+    const handlerModule = await import('../src/runtime/server/api/_oidc/login.get')
 
     handler = handlerModule.default
 
@@ -59,6 +58,9 @@ describe('auth login handler', () => {
     })
   })
 
+  // ---------------------------------------------------------------------------
+  // REDIRECT
+  // ---------------------------------------------------------------------------
   it('redirects to keycloak with correct params', async () => {
     const event = {} as any
 
@@ -75,6 +77,9 @@ describe('auth login handler', () => {
     expect(redirectUrl).toContain('redirect_uri=https%3A%2F%2Fexample.com%2Fapi%2Fauth%2Fcallback')
   })
 
+  // ---------------------------------------------------------------------------
+  // COOKIES
+  // ---------------------------------------------------------------------------
   it('sets state and verifier cookies', async () => {
     const event = {} as any
 
@@ -91,6 +96,9 @@ describe('auth login handler', () => {
     expect(calls[1][2]).toBeTruthy()
   })
 
+  // ---------------------------------------------------------------------------
+  // RANDOM STATE
+  // ---------------------------------------------------------------------------
   it('generates different state values per request', async () => {
     const event = {} as any
 

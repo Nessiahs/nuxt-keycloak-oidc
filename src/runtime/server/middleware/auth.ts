@@ -1,11 +1,10 @@
 import { attachAuthContext } from '../../utils/attachAuthContext'
-import { useRuntimeConfig } from '#app'
+import { useRuntimeConfig } from '#imports'
 import { getRequestURL, defineEventHandler, createError } from 'h3'
 import type { ResolvedModuleOptions } from '../../../types'
 import { resolveAuthAction } from '../../utils/resolveAuthAction'
 import { resolveTokenState } from '../../utils/resolveTokenState'
 import { handleRefreshFlow } from '../../utils/handleRefreshFlow'
-import { attachKeycloakHook } from '../../utils/attachKeycloakHook'
 import { handleUnauthorized } from '../../utils/handleUnauthorized'
 
 // Global authentication middleware for protecting routes.
@@ -45,9 +44,6 @@ export default defineEventHandler(async (event) => {
     case 'unauthorized':
       throw createError({ statusCode: 401 })
   }
-
-  // Attach optional user-defined hook (extension point)
-  attachKeycloakHook(event)
 
   // Resolve current token state (access + refresh)
   const { hasAccess, hasRefresh, accessPayload } = await resolveTokenState(event)

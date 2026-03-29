@@ -1,5 +1,5 @@
 import { createRemoteJWKSet, jwtVerify, errors } from 'jose'
-import { useRuntimeConfig } from '#app'
+import { useRuntimeConfig } from '#imports'
 
 import { getKeycloakDiscovery } from './keycloakDiscovery'
 import type { KeycloakJwtToken } from '../../types/keycloak.types'

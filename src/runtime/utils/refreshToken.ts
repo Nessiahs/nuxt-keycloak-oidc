@@ -1,7 +1,7 @@
 import { type H3Event, getCookie } from 'h3'
 import type { KeycloakTokenResponse } from '../../types/keycloak.types'
 import { getKeycloakDiscovery } from './keycloakDiscovery'
-import { useRuntimeConfig } from '#app'
+import { useRuntimeConfig } from '#imports'
 import type { ResolvedModuleOptions } from '../../types'
 import { getHashKey } from './getHashKey'
 

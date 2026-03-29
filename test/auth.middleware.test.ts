@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { setKeycloakConfig } from './utils/setKeycloakConfig'
 import middleware from '../src/runtime/server/middleware/auth'
 
 // ---------------- HOISTED MOCKS ----------------
@@ -9,7 +10,6 @@ const {
   mockAttachAuthContext,
   mockHandleRefreshFlow,
   mockHandleUnauthorized,
-  mockAttachKeycloakHook,
   mockCreateError,
 } = vi.hoisted(() => ({
   mockGetRequestURL: vi.fn(),
@@ -18,7 +18,6 @@ const {
   mockAttachAuthContext: vi.fn(),
   mockHandleRefreshFlow: vi.fn(),
   mockHandleUnauthorized: vi.fn(),
-  mockAttachKeycloakHook: vi.fn(),
   mockCreateError: vi.fn((err) => err),
 }))
 
@@ -27,12 +26,6 @@ vi.mock('h3', () => ({
   getRequestURL: mockGetRequestURL,
   defineEventHandler: (fn: any) => fn,
   createError: mockCreateError,
-}))
-
-vi.mock('#app', () => ({
-  useRuntimeConfig: () => ({
-    keycloak: { mode: 'protect-all' },
-  }),
 }))
 
 vi.mock('../src/runtime/utils/resolveAuthAction', () => ({
@@ -55,19 +48,22 @@ vi.mock('../src/runtime/utils/handleUnauthorized', () => ({
   handleUnauthorized: mockHandleUnauthorized,
 }))
 
-vi.mock('../src/runtime/utils/attachKeycloakHook', () => ({
-  attachKeycloakHook: mockAttachKeycloakHook,
-}))
-
 // ---------------- TESTS ----------------
 describe('auth middleware', () => {
-  const event: any = {
-    context: {},
-    node: { req: { headers: {} } },
-  }
+  let event: any
 
   beforeEach(() => {
     vi.clearAllMocks()
+
+    // 🔥 reset config (global mock)
+    setKeycloakConfig({
+      mode: 'protect-all',
+    })
+
+    event = {
+      context: {},
+      node: { req: { headers: {} } },
+    }
   })
 
   // ---------------------------------------------------------------------------
@@ -168,7 +164,7 @@ describe('auth middleware', () => {
     mockResolveTokenState.mockResolvedValue({
       hasAccess: true,
       hasRefresh: true,
-      accessPayload: { exp: Math.floor(Date.now() / 1000) + 10 }, // expiring
+      accessPayload: { exp: Math.floor(Date.now() / 1000) + 10 },
     })
 
     mockHandleRefreshFlow.mockResolvedValue(true)

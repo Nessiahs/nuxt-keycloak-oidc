@@ -1,6 +1,6 @@
 import { getKeycloakDiscovery } from '../../../utils/keycloakDiscovery'
 import { type H3Event, deleteCookie, defineEventHandler, sendRedirect, getRequestURL } from 'h3'
-import { useRuntimeConfig } from '#app'
+import { useRuntimeConfig } from '#imports'
 import type { ResolvedModuleOptions } from '../../../../types'
 
 // Handles logout flow:

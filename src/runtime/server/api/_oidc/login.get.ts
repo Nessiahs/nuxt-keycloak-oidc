@@ -1,6 +1,6 @@
 import type { H3Event } from 'h3'
 import { getRequestURL, setCookie, sendRedirect, defineEventHandler } from 'h3'
-import { useRuntimeConfig } from '#app'
+import { useRuntimeConfig } from '#imports'
 import crypto from 'node:crypto'
 import { getKeycloakDiscovery } from '../../../utils/keycloakDiscovery'
 import type { ResolvedModuleOptions } from '../../../../types'

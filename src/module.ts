@@ -1,4 +1,4 @@
-import { defineNuxtModule, addPlugin, createResolver } from '@nuxt/kit'
+import { defineNuxtModule, addPlugin, createResolver, addServerHandler } from '@nuxt/kit'
 import type { ModuleOptions } from './types'
 import setupModule from './setupModule'
 
@@ -37,7 +37,6 @@ export default defineNuxtModule<ModuleOptions>({
       clientId: '',
       clientSecret: '',
       publicRoutes: [],
-      protectedRoutes: [],
       mode: 'protect-all',
       ...existing,
     }
@@ -64,5 +63,25 @@ export default defineNuxtModule<ModuleOptions>({
     // Register runtime plugin
     const resolver = createResolver(import.meta.url)
     addPlugin(resolver.resolve('./runtime/plugin'))
+
+    addServerHandler({
+      route: '/api/_oidc/login',
+      handler: resolver.resolve('./runtime/server/api/_oidc/login.get.ts'),
+    })
+
+    addServerHandler({
+      route: '/api/_oidc/callback',
+      handler: resolver.resolve('./runtime/server/api/_oidc/callback.get.ts'),
+    })
+
+    addServerHandler({
+      route: '/api/_oidc/logout',
+      handler: resolver.resolve('./runtime/server/api/_oidc/logout.get.ts'),
+    })
+
+    addServerHandler({
+      middleware: true,
+      handler: resolver.resolve('./runtime/server/middleware/auth.ts'),
+    })
   },
 })

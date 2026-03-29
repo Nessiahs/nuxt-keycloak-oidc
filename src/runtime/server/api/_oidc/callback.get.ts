@@ -12,7 +12,7 @@ import {
   defineEventHandler,
 } from 'h3'
 
-import { useRuntimeConfig } from '#app'
+import { useRuntimeConfig } from '#imports'
 import type { ResolvedModuleOptions } from '../../../../types'
 import type { KeycloakTokenResponse } from '../../../../types/keycloak.types'
 
