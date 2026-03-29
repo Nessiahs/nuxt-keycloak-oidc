@@ -74,7 +74,7 @@ describe('auth login handler', () => {
     expect(redirectUrl).toContain('client_id=test-client')
     expect(redirectUrl).toContain('response_type=code')
     expect(redirectUrl).toContain('code_challenge_method=S256')
-    expect(redirectUrl).toContain('redirect_uri=https%3A%2F%2Fexample.com%2Fapi%2Fauth%2Fcallback')
+    expect(redirectUrl).toContain('redirect_uri=https%3A%2F%2Fexample.com%2Fapi%2F_oidc%2Fcallback')
   })
 
   // ---------------------------------------------------------------------------

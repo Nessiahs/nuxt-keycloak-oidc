@@ -61,19 +61,37 @@ describe('setupModule', () => {
   it('logs resolved configuration', () => {
     setupModule(validConfig())
 
-    expect(infoSpy).toHaveBeenCalledWith(
-      '[nuxt-keycloak] Resolved configuration:',
-      expect.objectContaining({
-        url: 'http://localhost:8080',
-        realm: 'test',
-        clientId: 'client',
-      }),
-    )
+    const log = infoSpy.mock.calls[0][0]
+
+    expect(log).toContain('[nuxt-keycloak] Resolved configuration')
+    expect(log).toContain('url: http://localhost:8080')
+    expect(log).toContain('realm: test')
+    expect(log).toContain('clientId: client')
+    expect(log).toContain('cookie')
+    expect(log).toContain('sameSite')
+    expect(log).toContain('secure')
+    expect(log).toContain('path')
+    expect(log).toContain('domain')
   })
 
   // ---------------------------------------------------------------------------
   // MODE HANDLING
   // ---------------------------------------------------------------------------
+  it('warns when sameSite is "none" without secure=true', () => {
+    setupModule(
+      validConfig({
+        cookie: {
+          sameSite: 'none',
+          secure: false,
+        },
+      }),
+    )
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining('sameSite="none" requires secure=true'),
+    )
+  })
+
   it('warns in protect-selected mode', () => {
     setupModule(validConfig({ mode: 'protect-selected' }))
 

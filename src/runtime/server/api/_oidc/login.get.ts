@@ -51,7 +51,7 @@ export default defineEventHandler(async (event: H3Event) => {
   // In production environments, consider configuring a fixed base URL
   // to avoid relying on potentially untrusted host headers.
   const baseUrl = `${url.protocol}//${url.host}`
-  const redirect = new URL('/api/auth/callback', baseUrl).toString()
+  const redirect = new URL('/api/_oidc/callback', baseUrl).toString()
 
   // Build authorization request parameters
   const authParams = new URLSearchParams({

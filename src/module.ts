@@ -11,6 +11,10 @@ export default defineNuxtModule<ModuleOptions>({
   // Default module options (applied to `options` only, not runtimeConfig)
   defaults: {
     enabled: false,
+    cookie: {
+      sameSite: 'lax',
+      path: '/',
+    },
   },
 
   setup(options, nuxt) {
@@ -36,9 +40,15 @@ export default defineNuxtModule<ModuleOptions>({
       realm: '',
       clientId: '',
       clientSecret: '',
-      publicRoutes: [],
       mode: 'protect-all',
       ...existing,
+      cookie: {
+        sameSite: undefined,
+        secure: undefined,
+        path: undefined,
+        domain: undefined,
+        ...(existing.cookie || {}),
+      },
     }
 
     // Current runtime state (defaults + ENV + user runtimeConfig)

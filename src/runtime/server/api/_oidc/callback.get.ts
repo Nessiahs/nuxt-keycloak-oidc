@@ -29,7 +29,7 @@ export default defineEventHandler(async (event: H3Event) => {
   const verifier = getCookie(event, 'kc_verifier')
 
   if (!code || !state || !storedState || state !== storedState || !verifier) {
-    return sendRedirect(event, '/api/auth/login')
+    return sendRedirect(event, '/api/_oidc/login')
   }
 
   const usedCode = getCookie(event, 'kc_code_used')
@@ -47,7 +47,7 @@ export default defineEventHandler(async (event: H3Event) => {
   })
   const url = getRequestURL(event)
 
-  const redirectUri = `${url.protocol}//${url.host}/api/auth/callback`
+  const redirectUri = `${url.protocol}//${url.host}/api/_oidc/callback`
 
   const body = new URLSearchParams({
     grant_type: 'authorization_code',
@@ -69,10 +69,12 @@ export default defineEventHandler(async (event: H3Event) => {
       },
       body,
     })
+    const isProd = process.env.NODE_ENV === 'production'
+
     setCookie(event, 'kc_access', token.access_token, {
       httpOnly: true,
       sameSite: 'lax',
-      secure: true,
+      secure: isProd,
       maxAge: token.expires_in,
       path: '/',
     })
@@ -80,7 +82,7 @@ export default defineEventHandler(async (event: H3Event) => {
     setCookie(event, 'kc_refresh', token.refresh_token, {
       httpOnly: true,
       sameSite: 'lax',
-      secure: true,
+      secure: isProd,
       maxAge: token.refresh_expires_in,
       path: '/',
     })
@@ -98,6 +100,6 @@ export default defineEventHandler(async (event: H3Event) => {
 
     return sendRedirect(event, userRedirectUri)
   } catch {
-    return sendRedirect(event, '/api/auth/login')
+    return sendRedirect(event, '/api/_oidc/login')
   }
 })

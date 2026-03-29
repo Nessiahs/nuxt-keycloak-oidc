@@ -109,7 +109,7 @@ describe('auth callback handler', () => {
 
     await handler(event)
 
-    expect(h3.sendRedirect).toHaveBeenCalledWith(event, '/api/auth/login')
+    expect(h3.sendRedirect).toHaveBeenCalledWith(event, '/api/_oidc/login')
   })
 
   // ---------------------------------------------------------------------------
@@ -125,7 +125,7 @@ describe('auth callback handler', () => {
 
     await handler(event)
 
-    expect(h3.sendRedirect).toHaveBeenCalledWith(event, '/api/auth/login')
+    expect(h3.sendRedirect).toHaveBeenCalledWith(event, '/api/_oidc/login')
   })
 
   // ---------------------------------------------------------------------------
@@ -156,7 +156,7 @@ describe('auth callback handler', () => {
 
     await handler(event)
 
-    expect(h3.sendRedirect).toHaveBeenCalledWith(event, '/api/auth/login')
+    expect(h3.sendRedirect).toHaveBeenCalledWith(event, '/api/_oidc/login')
   })
 
   // ---------------------------------------------------------------------------
