@@ -6,11 +6,16 @@
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "types": ["node", "nuxt"],
+    "types": ["node", "nuxt", "@types/node"],
     "declaration": true,
     "paths": {
       "#app": ["./node_modules/nuxt/dist/app"]
     }
   },
+  "include": [
+    "types",
+    "src",
+    "test"
+  ],
   "exclude": ["dist", "node_modules", "playground"]
 }

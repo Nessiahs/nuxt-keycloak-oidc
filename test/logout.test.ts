@@ -1,15 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { getKeycloakDiscovery } from '../src/runtime/utils/keycloakDiscovery'
-
+import { setKeycloakConfig } from './utils/setKeycloakConfig'
 // --- mocks ---
-vi.mock('#app', () => ({
-  useRuntimeConfig: () => ({
-    keycloak: {
-      clientId: 'test-client',
-    },
-  }),
-}))
-
 vi.mock('../src/runtime/utils/keycloakDiscovery', () => ({
   getKeycloakDiscovery: vi.fn(),
 }))
@@ -28,16 +19,18 @@ vi.mock('h3', async () => {
 describe('auth logout handler', () => {
   let handler: any
   let h3: any
-
-  // 👉 sauberer Zugriff auf den Mock
-  const mockGetKeycloakDiscovery = vi.mocked(getKeycloakDiscovery)
+  let discoveryModule: any
 
   beforeEach(async () => {
     vi.clearAllMocks()
 
+    discoveryModule = await import('../src/runtime/utils/keycloakDiscovery')
+    setKeycloakConfig({
+      clientId: 'test-client',
+    })
     h3 = await import('h3')
 
-    const handlerModule = await import('../src/runtime/server/api/_oicd/logout.get')
+    const handlerModule = await import('../src/runtime/server/api/_oidc/logout.get')
 
     handler = handlerModule.default
 
@@ -47,8 +40,11 @@ describe('auth logout handler', () => {
     })
   })
 
+  // ---------------------------------------------------------------------------
+  // COOKIE CLEANUP
+  // ---------------------------------------------------------------------------
   it('clears all auth-related cookies', async () => {
-    mockGetKeycloakDiscovery.mockResolvedValue({} as any)
+    discoveryModule.getKeycloakDiscovery.mockResolvedValue({})
 
     const event = {} as any
 
@@ -62,8 +58,11 @@ describe('auth logout handler', () => {
     expect(h3.deleteCookie).toHaveBeenCalledWith(event, 'kc_code_used')
   })
 
+  // ---------------------------------------------------------------------------
+  // LOCAL REDIRECT
+  // ---------------------------------------------------------------------------
   it('redirects locally if no end_session_endpoint exists', async () => {
-    mockGetKeycloakDiscovery.mockResolvedValue({} as any)
+    discoveryModule.getKeycloakDiscovery.mockResolvedValue({})
 
     const event = {} as any
 
@@ -72,10 +71,13 @@ describe('auth logout handler', () => {
     expect(h3.sendRedirect).toHaveBeenCalledWith(event, 'https://example.com/')
   })
 
+  // ---------------------------------------------------------------------------
+  // KEYCLOAK LOGOUT
+  // ---------------------------------------------------------------------------
   it('redirects to Keycloak logout endpoint when available', async () => {
-    mockGetKeycloakDiscovery.mockResolvedValue({
+    discoveryModule.getKeycloakDiscovery.mockResolvedValue({
       end_session_endpoint: 'https://keycloak.test/logout',
-    } as any)
+    })
 
     const event = {} as any
 

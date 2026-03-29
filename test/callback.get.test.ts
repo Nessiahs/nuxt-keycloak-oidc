@@ -1,15 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { setKeycloakConfig } from './utils/setKeycloakConfig'
 
-// --- mocks ---
-vi.mock('#app', () => ({
-  useRuntimeConfig: () => ({
-    keycloak: {
-      clientId: 'test-client',
-      clientSecret: 'secret',
-    },
-  }),
+// --- HOISTED MOCKS ---
+const { mockFetch } = vi.hoisted(() => ({
+  mockFetch: vi.fn(),
 }))
 
+vi.stubGlobal('$fetch', mockFetch)
+
+// --- MODULE MOCKS ---
 vi.mock('../src/runtime/utils/keycloakDiscovery', () => ({
   getKeycloakDiscovery: vi.fn(),
 }))
@@ -29,10 +28,6 @@ vi.mock('h3', async () => {
   }
 })
 
-// mock fetch
-const mockFetch = vi.fn()
-global.$fetch = mockFetch as any
-
 describe('auth callback handler', () => {
   let handler: any
   let h3: any
@@ -41,14 +36,19 @@ describe('auth callback handler', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
 
+    // 🔥 config reset (default public client)
+    setKeycloakConfig({
+      clientId: 'test-client',
+      clientSecret: 'secret', // optional → hier bewusst gesetzt
+    })
+
     discoveryModule = await import('../src/runtime/utils/keycloakDiscovery')
     h3 = await import('h3')
 
-    const handlerModule = await import('../src/runtime/server/api/_oicd/callback.get')
-
+    const handlerModule = await import('../src/runtime/server/api/_oidc/callback.get')
     handler = handlerModule.default
 
-    // default mocks
+    // --- defaults ---
     discoveryModule.getKeycloakDiscovery.mockResolvedValue({
       token_endpoint: 'https://keycloak.test/token',
     })
@@ -72,8 +72,11 @@ describe('auth callback handler', () => {
     })
   })
 
+  // ---------------------------------------------------------------------------
+  // SUCCESS
+  // ---------------------------------------------------------------------------
   it('exchanges code and sets tokens', async () => {
-    global.$fetch.mockResolvedValue({
+    mockFetch.mockResolvedValue({
       access_token: 'access',
       refresh_token: 'refresh',
       expires_in: 300,
@@ -84,7 +87,7 @@ describe('auth callback handler', () => {
 
     await handler(event)
 
-    expect(global.$fetch).toHaveBeenCalled()
+    expect(mockFetch).toHaveBeenCalled()
 
     expect(h3.setCookie).toHaveBeenCalledWith(event, 'kc_access', 'access', expect.any(Object))
 
@@ -93,6 +96,9 @@ describe('auth callback handler', () => {
     expect(h3.sendRedirect).toHaveBeenCalled()
   })
 
+  // ---------------------------------------------------------------------------
+  // INVALID STATE
+  // ---------------------------------------------------------------------------
   it('rejects invalid state', async () => {
     h3.getCookie.mockImplementation((_, name) => {
       if (name === 'kc_state') return 'wrong'
@@ -106,6 +112,9 @@ describe('auth callback handler', () => {
     expect(h3.sendRedirect).toHaveBeenCalledWith(event, '/api/auth/login')
   })
 
+  // ---------------------------------------------------------------------------
+  // MISSING VERIFIER
+  // ---------------------------------------------------------------------------
   it('rejects missing verifier', async () => {
     h3.getCookie.mockImplementation((_, name) => {
       if (name === 'kc_state') return 'state123'
@@ -119,6 +128,9 @@ describe('auth callback handler', () => {
     expect(h3.sendRedirect).toHaveBeenCalledWith(event, '/api/auth/login')
   })
 
+  // ---------------------------------------------------------------------------
+  // REPLAY PROTECTION
+  // ---------------------------------------------------------------------------
   it('prevents replay of used code', async () => {
     h3.getCookie.mockImplementation((_, name) => {
       if (name === 'kc_state') return 'state123'
@@ -131,11 +143,14 @@ describe('auth callback handler', () => {
     await handler(event)
 
     expect(h3.setResponseStatus).toHaveBeenCalledWith(event, 204)
-    expect(global.$fetch).not.toHaveBeenCalled()
+    expect(mockFetch).not.toHaveBeenCalled()
   })
 
+  // ---------------------------------------------------------------------------
+  // FETCH FAILURE
+  // ---------------------------------------------------------------------------
   it('handles token exchange failure', async () => {
-    global.$fetch.mockRejectedValue(new Error('fail'))
+    mockFetch.mockRejectedValue(new Error('fail'))
 
     const event = {} as any
 
@@ -144,8 +159,11 @@ describe('auth callback handler', () => {
     expect(h3.sendRedirect).toHaveBeenCalledWith(event, '/api/auth/login')
   })
 
+  // ---------------------------------------------------------------------------
+  // OPEN REDIRECT PROTECTION
+  // ---------------------------------------------------------------------------
   it('prevents open redirect', async () => {
-    global.$fetch.mockResolvedValue({
+    mockFetch.mockResolvedValue({
       access_token: 'a',
       refresh_token: 'r',
       expires_in: 300,
@@ -168,8 +186,11 @@ describe('auth callback handler', () => {
     expect(h3.sendRedirect).toHaveBeenCalledWith(event, '/')
   })
 
+  // ---------------------------------------------------------------------------
+  // VALID REDIRECT
+  // ---------------------------------------------------------------------------
   it('redirects to original path when valid', async () => {
-    global.$fetch.mockResolvedValue({
+    mockFetch.mockResolvedValue({
       access_token: 'a',
       refresh_token: 'r',
       expires_in: 300,
