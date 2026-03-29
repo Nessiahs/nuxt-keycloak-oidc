@@ -90,6 +90,11 @@ export default defineNuxtModule<ModuleOptions>({
     })
 
     addServerHandler({
+      route: '/api/_oidc/debug',
+      handler: resolver.resolve('./runtime/server/api/_oidc/debug.get.ts'),
+    })
+
+    addServerHandler({
       middleware: true,
       handler: resolver.resolve('./runtime/server/middleware/auth.ts'),
     })
