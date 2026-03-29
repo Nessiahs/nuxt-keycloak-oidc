@@ -17,7 +17,7 @@ describe('resolveAuthAction', () => {
     it('does not protect route when explicitly disabled', () => {
       const result = resolveAuthAction({
         mode: 'protect-all',
-        rules: { keycloak: false },
+        rules: { auth: false },
       })
 
       expect(result.isProtected).toBe(false)
@@ -27,7 +27,7 @@ describe('resolveAuthAction', () => {
     it('protects route when explicitly enabled', () => {
       const result = resolveAuthAction({
         mode: 'protect-all',
-        rules: { keycloak: true },
+        rules: { auth: true },
         accept: 'text/html',
       })
 
@@ -52,7 +52,7 @@ describe('resolveAuthAction', () => {
     it('protects route only when explicitly enabled', () => {
       const result = resolveAuthAction({
         mode: 'protect-selected',
-        rules: { keycloak: true },
+        rules: { auth: true },
         accept: 'text/html',
       })
 
@@ -63,7 +63,7 @@ describe('resolveAuthAction', () => {
     it('does not protect route when explicitly false', () => {
       const result = resolveAuthAction({
         mode: 'protect-selected',
-        rules: { keycloak: false },
+        rules: { auth: false },
       })
 
       expect(result.isProtected).toBe(false)
