@@ -1,6 +1,7 @@
 import { defineEventHandler, createError, getCookie } from 'h3'
 import { useRuntimeConfig } from '#imports'
 import type { ResolvedModuleOptions } from '../../../../types'
+import { COOKIE_NAMES } from '../../../constants/cookies'
 
 export default defineEventHandler(async (event) => {
   const runtimeConfig = useRuntimeConfig()
@@ -47,19 +48,21 @@ export default defineEventHandler(async (event) => {
   // SESSION / COOKIE STATE
   // ---------------------------------------------------------------------------
   const cookies = {
-    accessToken: !!getCookie(event, 'kc_access'),
-    refreshToken: !!getCookie(event, 'kc_refresh'),
-    state: !!getCookie(event, 'kc_state'),
-    verifier: !!getCookie(event, 'kc_verifier'),
+    accessToken: !!getCookie(event, COOKIE_NAMES.ACCESS),
+    refreshToken: !!getCookie(event, COOKIE_NAMES.REFRESH),
+    state: !!getCookie(event, COOKIE_NAMES.STATE),
+    verifier: !!getCookie(event, COOKIE_NAMES.VERIFIER),
   }
 
   // ---------------------------------------------------------------------------
   // SECURITY INFO
   // ---------------------------------------------------------------------------
   const security = {
-    sameSite: 'lax',
-    cookiesSecure: true,
     pkce: true,
+  }
+
+  const cookie = {
+    ...config.cookie,
   }
 
   // ---------------------------------------------------------------------------
@@ -77,6 +80,7 @@ export default defineEventHandler(async (event) => {
 
     session: cookies,
 
+    cookie,
     security,
 
     hints: {

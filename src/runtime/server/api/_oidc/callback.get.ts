@@ -15,6 +15,9 @@ import {
 import { useRuntimeConfig } from '#imports'
 import type { ResolvedModuleOptions } from '../../../../types'
 import type { KeycloakTokenResponse } from '../../../../types/keycloak.types'
+import { COOKIE_NAMES } from '../../../constants/cookies'
+
+import { resolveCookieOptions } from '../../../utils/resolveCookieOptions'
 
 export default defineEventHandler(async (event: H3Event) => {
   const runtimeConfig = useRuntimeConfig()
@@ -25,26 +28,20 @@ export default defineEventHandler(async (event: H3Event) => {
   const code = query.code as string
   const state = query.state as string
 
-  const storedState = getCookie(event, 'kc_state')
-  const verifier = getCookie(event, 'kc_verifier')
+  const storedState = getCookie(event, COOKIE_NAMES.STATE)
+  const verifier = getCookie(event, COOKIE_NAMES.VERIFIER)
 
   if (!code || !state || !storedState || state !== storedState || !verifier) {
     return sendRedirect(event, '/api/_oidc/login')
   }
 
-  const usedCode = getCookie(event, 'kc_code_used')
+  const usedCode = getCookie(event, COOKIE_NAMES.CODE_USED)
   if (usedCode === code) {
     setResponseStatus(event, 204)
     return
   }
 
-  setCookie(event, 'kc_code_used', code, {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: true,
-    maxAge: 60,
-    path: '/',
-  })
+  setCookie(event, COOKIE_NAMES.CODE_USED, code, resolveCookieOptions(config, 6000))
   const url = getRequestURL(event)
 
   const redirectUri = `${url.protocol}//${url.host}/api/_oidc/callback`
@@ -69,30 +66,27 @@ export default defineEventHandler(async (event: H3Event) => {
       },
       body,
     })
-    const isProd = process.env.NODE_ENV === 'production'
 
-    setCookie(event, 'kc_access', token.access_token, {
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: isProd,
-      maxAge: token.expires_in,
-      path: '/',
-    })
+    setCookie(
+      event,
+      COOKIE_NAMES.ACCESS,
+      token.access_token,
+      resolveCookieOptions(config, token.expires_in),
+    )
 
-    setCookie(event, 'kc_refresh', token.refresh_token, {
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: isProd,
-      maxAge: token.refresh_expires_in,
-      path: '/',
-    })
+    setCookie(
+      event,
+      COOKIE_NAMES.REFRESH,
+      token.refresh_token,
+      resolveCookieOptions(config, token.refresh_expires_in),
+    )
 
-    deleteCookie(event, 'kc_state')
-    deleteCookie(event, 'kc_verifier')
+    deleteCookie(event, COOKIE_NAMES.STATE)
+    deleteCookie(event, COOKIE_NAMES.VERIFIER)
 
-    const userRedirectUri = getCookie(event, 'redirect_to') ?? ''
+    const userRedirectUri = getCookie(event, COOKIE_NAMES.REDIRECT_TO) ?? ''
 
-    deleteCookie(event, 'redirect_to')
+    deleteCookie(event, COOKIE_NAMES.REDIRECT_TO)
 
     if (!userRedirectUri.startsWith('/')) {
       return sendRedirect(event, '/')

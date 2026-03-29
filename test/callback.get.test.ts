@@ -36,10 +36,13 @@ describe('auth callback handler', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
 
-    // 🔥 config reset (default public client)
     setKeycloakConfig({
       clientId: 'test-client',
-      clientSecret: 'secret', // optional → hier bewusst gesetzt
+      clientSecret: 'secret',
+      cookie: {
+        sameSite: 'lax',
+        path: '/',
+      },
     })
 
     discoveryModule = await import('../src/runtime/utils/keycloakDiscovery')

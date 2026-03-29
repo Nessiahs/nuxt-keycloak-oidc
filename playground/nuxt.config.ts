@@ -11,6 +11,10 @@ export default defineNuxtConfig({
     clientId: 'nuxt-confidential',
     clientSecret: 'super-secret',
     mode: 'protect-all',
+    cookie: {
+      "sameSite": "lax",
+      "path": "/"
+    }
 
   },
 })

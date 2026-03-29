@@ -3,6 +3,7 @@ import { getCookie } from 'h3'
 import type { TokenValidationResult } from './validateToken'
 import { validateToken } from './validateToken'
 import type { KeycloakJwtToken } from '../../types/keycloak.types'
+import { COOKIE_NAMES } from '../constants/cookies'
 
 type TokenState = {
   hasAccess: boolean
@@ -22,8 +23,8 @@ const invalidResult: TokenValidationResult = {
 
 export async function resolveTokenState(event: H3Event): Promise<TokenState> {
   // Read cookies from request
-  const accessCookie = getCookie(event, 'kc_access')
-  const refreshCookie = getCookie(event, 'kc_refresh')
+  const accessCookie = getCookie(event, COOKIE_NAMES.ACCESS)
+  const refreshCookie = getCookie(event, COOKIE_NAMES.REFRESH)
 
   // Validate tokens in parallel for better performance
   // If no cookie is present, use a static invalid result

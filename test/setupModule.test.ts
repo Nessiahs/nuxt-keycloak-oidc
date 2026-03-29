@@ -9,6 +9,10 @@ function validConfig(overrides: any = {}) {
     realm: 'test',
     clientId: 'client',
     mode: 'protect-all',
+    cookie: {
+      sameSite: 'lax',
+      path: '/',
+    },
     ...overrides,
   }
 }
@@ -174,6 +178,10 @@ describe('setupModule', () => {
         realm: 'test',
         clientId: 'client',
         mode: 'protect-all',
+        cookie: {
+          sameSite: 'lax',
+          path: '/',
+        },
       }),
     ).not.toThrow()
   })
