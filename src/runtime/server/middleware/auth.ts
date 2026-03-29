@@ -67,7 +67,7 @@ export default defineEventHandler(async (event) => {
 
   // Attempt token refresh if refresh token is available
   if (hasRefresh) {
-    const success = await handleRefreshFlow(event, check.isHtmlRequest)
+    const success = await handleRefreshFlow(event, check.isHtmlRequest, config)
 
     if (success) return
 

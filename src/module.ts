@@ -1,5 +1,5 @@
 import { defineNuxtModule, addPlugin, createResolver, addServerHandler } from '@nuxt/kit'
-import type { ModuleOptions } from './types'
+import type { ModuleOptions, ResolvedModuleOptions } from './types'
 import setupModule from './setupModule'
 
 export default defineNuxtModule<ModuleOptions>({
@@ -11,6 +11,10 @@ export default defineNuxtModule<ModuleOptions>({
   // Default module options (applied to `options` only, not runtimeConfig)
   defaults: {
     enabled: false,
+    cookie: {
+      sameSite: 'lax',
+      path: '/',
+    },
   },
 
   setup(options, nuxt) {
@@ -36,13 +40,19 @@ export default defineNuxtModule<ModuleOptions>({
       realm: '',
       clientId: '',
       clientSecret: '',
-      publicRoutes: [],
       mode: 'protect-all',
       ...existing,
+      cookie: {
+        sameSite: undefined,
+        secure: undefined,
+        path: undefined,
+        domain: undefined,
+        ...(existing.cookie ?? {}),
+      },
     }
 
     // Current runtime state (defaults + ENV + user runtimeConfig)
-    const current = runtime.keycloak as Partial<ModuleOptions>
+    const current = runtime.keycloak as Partial<ResolvedModuleOptions>
 
     // Final merge strategy:
     // - runtimeConfig (ENV / external values)
@@ -55,10 +65,18 @@ export default defineNuxtModule<ModuleOptions>({
 
     // Persist final resolved configuration back into runtimeConfig
     // This becomes the single source of truth for plugins and middleware
-    runtime.keycloak = { ...runtimeOptions }
-
+    runtime.keycloak = {
+      ...runtimeOptions,
+      cookie: {
+        sameSite: runtimeOptions.cookie?.sameSite ?? 'lax',
+        path: runtimeOptions.cookie?.path ?? '/',
+        secure: runtimeOptions.cookie?.secure,
+        domain: runtimeOptions.cookie?.domain,
+      },
+    }
+    const resolvedConfig = runtime.keycloak as ResolvedModuleOptions
     // Validate and log configuration (security checks, warnings, etc.)
-    setupModule(runtimeOptions)
+    setupModule(resolvedConfig)
 
     // Register runtime plugin
     const resolver = createResolver(import.meta.url)

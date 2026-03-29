@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { setRedirectCookie } from '../src/runtime/utils/setRedirectCookie'
+import { COOKIE_NAMES } from '../src/runtime/constants/cookies'
 
 // ---------------- HOISTED MOCKS ----------------
 const { mockGetCookie, mockSetCookie, mockGetRequestURL } = vi.hoisted(() => ({
@@ -8,11 +9,23 @@ const { mockGetCookie, mockSetCookie, mockGetRequestURL } = vi.hoisted(() => ({
   mockGetRequestURL: vi.fn(),
 }))
 
-// ---------------- MODULE MOCK ----------------
+// ---------------- MODULE MOCKS ----------------
 vi.mock('h3', () => ({
   getCookie: mockGetCookie,
   setCookie: mockSetCookie,
   getRequestURL: mockGetRequestURL,
+}))
+
+vi.mock('#imports', () => ({
+  useRuntimeConfig: () => ({
+    keycloak: {
+      cookie: {
+        sameSite: 'lax',
+        path: '/',
+        secure: true,
+      },
+    },
+  }),
 }))
 
 // ---------------- TESTS ----------------
@@ -36,7 +49,7 @@ describe('setRedirectCookie', () => {
 
     expect(mockSetCookie).toHaveBeenCalledWith(
       expect.anything(),
-      'redirect_to',
+      COOKIE_NAMES.REDIRECT_TO,
       '/dashboard?tab=profile',
       expect.objectContaining({
         httpOnly: true,
@@ -90,7 +103,7 @@ describe('setRedirectCookie', () => {
 
     expect(mockSetCookie).toHaveBeenCalledWith(
       expect.anything(),
-      'redirect_to',
+      COOKIE_NAMES.REDIRECT_TO,
       '/dashboard',
       expect.anything(),
     )
@@ -111,7 +124,7 @@ describe('setRedirectCookie', () => {
 
     expect(mockSetCookie).toHaveBeenCalledWith(
       expect.anything(),
-      'redirect_to',
+      COOKIE_NAMES.REDIRECT_TO,
       '/',
       expect.anything(),
     )

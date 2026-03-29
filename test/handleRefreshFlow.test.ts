@@ -28,6 +28,14 @@ vi.mock('h3', () => ({
   createError: vi.fn((err) => err),
 }))
 
+// ---------------- TEST CONFIG ----------------
+const config = {
+  cookie: {
+    sameSite: 'lax',
+    path: '/',
+  },
+} as any
+
 // ---------------- TESTS ----------------
 describe('handleRefreshFlow', () => {
   beforeEach(() => {
@@ -49,7 +57,7 @@ describe('handleRefreshFlow', () => {
 
     mockVerifyAccessToken.mockResolvedValue(payload)
 
-    const result = await handleRefreshFlow({} as any, true)
+    const result = await handleRefreshFlow({} as any, true, config)
 
     expect(result).toBe(true)
 
@@ -64,7 +72,7 @@ describe('handleRefreshFlow', () => {
   it('returns false for HTML request if refresh fails', async () => {
     mockRefreshToken.mockResolvedValue(false)
 
-    const result = await handleRefreshFlow({} as any, true)
+    const result = await handleRefreshFlow({} as any, true, config)
 
     expect(result).toBe(false)
   })
@@ -72,7 +80,7 @@ describe('handleRefreshFlow', () => {
   it('throws 401 for API request if refresh fails', async () => {
     mockRefreshToken.mockResolvedValue(false)
 
-    await expect(handleRefreshFlow({} as any, false)).rejects.toMatchObject({
+    await expect(handleRefreshFlow({} as any, false, config)).rejects.toMatchObject({
       statusCode: 401,
     })
   })
@@ -83,7 +91,7 @@ describe('handleRefreshFlow', () => {
   it('handles missing access_token (HTML)', async () => {
     mockRefreshToken.mockResolvedValue({})
 
-    const result = await handleRefreshFlow({} as any, true)
+    const result = await handleRefreshFlow({} as any, true, config)
 
     expect(result).toBe(false)
   })
@@ -91,7 +99,7 @@ describe('handleRefreshFlow', () => {
   it('throws if access_token missing for API request', async () => {
     mockRefreshToken.mockResolvedValue({})
 
-    await expect(handleRefreshFlow({} as any, false)).rejects.toMatchObject({
+    await expect(handleRefreshFlow({} as any, false, config)).rejects.toMatchObject({
       statusCode: 401,
     })
   })
@@ -106,7 +114,7 @@ describe('handleRefreshFlow', () => {
 
     mockVerifyAccessToken.mockResolvedValue(null)
 
-    const result = await handleRefreshFlow({} as any, true)
+    const result = await handleRefreshFlow({} as any, true, config)
 
     expect(result).toBe(false)
   })
@@ -118,7 +126,7 @@ describe('handleRefreshFlow', () => {
 
     mockVerifyAccessToken.mockResolvedValue(null)
 
-    await expect(handleRefreshFlow({} as any, false)).rejects.toMatchObject({
+    await expect(handleRefreshFlow({} as any, false, config)).rejects.toMatchObject({
       statusCode: 401,
     })
   })
@@ -134,7 +142,7 @@ describe('handleRefreshFlow', () => {
 
     mockVerifyAccessToken.mockResolvedValue({ exp: 999999 })
 
-    const result = await handleRefreshFlow({} as any, true)
+    const result = await handleRefreshFlow({} as any, true, config)
 
     expect(result).toBe(true)
 
@@ -152,7 +160,7 @@ describe('handleRefreshFlow', () => {
 
     mockVerifyAccessToken.mockResolvedValue(null)
 
-    await handleRefreshFlow({} as any, true)
+    await handleRefreshFlow({} as any, true, config)
 
     expect(mockSetCookie).not.toHaveBeenCalled()
   })

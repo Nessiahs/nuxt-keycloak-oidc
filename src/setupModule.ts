@@ -1,6 +1,6 @@
-import type { ModuleOptions } from './types'
+import type { ResolvedModuleOptions } from './types'
 
-type SetupOptions = Omit<ModuleOptions, 'enabled'>
+type SetupOptions = Omit<ResolvedModuleOptions, 'enabled'>
 // Validates and reports the final resolved configuration.
 // This function is intentionally side-effectful (console output + throws)
 // to provide clear feedback during module initialization.
@@ -33,11 +33,26 @@ export default function setupModule(config: SetupOptions) {
 
   // Log resolved (non-sensitive) configuration for visibility
   // Helps debugging especially when ENV overrides are involved
-  console.info('[nuxt-keycloak] Resolved configuration:', {
-    url: config.url,
-    realm: config.realm,
-    clientId: config.clientId,
-  })
+  console.info(
+    '[nuxt-keycloak] Resolved configuration:\n' +
+      `  🌐 url: ${config.url}\n` +
+      `  🏰 realm: ${config.realm}\n` +
+      `  🆔 clientId: ${config.clientId}\n` +
+      `  🍪 cookie:\n` +
+      `    • sameSite: ${config.cookie?.sameSite}\n` +
+      `    • secure: ${config.cookie?.secure}\n` +
+      `    • path: ${config.cookie?.path}\n` +
+      `    • domain: ${config.cookie?.domain}`,
+  )
+
+  // Warn if sameSite is set to 'none' without secure=true
+  // Browsers (especially Safari) require secure cookies for cross-site usage
+  // Otherwise cookies may be silently dropped, leading to broken auth flows
+  if (config.cookie.sameSite === 'none' && config.cookie.secure !== true) {
+    console.warn(
+      '[nuxt-keycloak] sameSite="none" requires secure=true (cookies may be dropped by browsers like Safari)',
+    )
+  }
 
   // Inform about security model based on selected mode
   // protect-selected → only explicit routes are protected (less secure)

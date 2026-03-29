@@ -2,6 +2,7 @@ import { getKeycloakDiscovery } from '../../../utils/keycloakDiscovery'
 import { type H3Event, deleteCookie, defineEventHandler, sendRedirect, getRequestURL } from 'h3'
 import { useRuntimeConfig } from '#imports'
 import type { ResolvedModuleOptions } from '../../../../types'
+import { COOKIE_NAMES } from '../../../constants/cookies'
 
 // Handles logout flow:
 // - clears all local session cookies
@@ -15,12 +16,12 @@ export default defineEventHandler(async (event: H3Event) => {
   const discovery = await getKeycloakDiscovery(config)
 
   // Clear all locally stored authentication/session cookies
-  deleteCookie(event, 'kc_access')
-  deleteCookie(event, 'kc_refresh')
-  deleteCookie(event, 'redirect_to')
-  deleteCookie(event, 'kc_state')
-  deleteCookie(event, 'kc_verifier')
-  deleteCookie(event, 'kc_code_used')
+  deleteCookie(event, COOKIE_NAMES.ACCESS)
+  deleteCookie(event, COOKIE_NAMES.REFRESH)
+  deleteCookie(event, COOKIE_NAMES.REDIRECT_TO)
+  deleteCookie(event, COOKIE_NAMES.STATE)
+  deleteCookie(event, COOKIE_NAMES.VERIFIER)
+  deleteCookie(event, COOKIE_NAMES.CODE_USED)
 
   const url = getRequestURL(event)
 

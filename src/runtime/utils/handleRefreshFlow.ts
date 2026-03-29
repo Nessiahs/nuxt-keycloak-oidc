@@ -3,6 +3,9 @@ import { createError, setCookie } from 'h3'
 import { refreshToken } from './refreshToken'
 import { verifyAccessToken } from './verifyAccessToken'
 import { attachAuthContext } from './attachAuthContext'
+import { COOKIE_NAMES } from '../constants/cookies'
+import type { ResolvedModuleOptions } from '../../types'
+import { resolveCookieOptions } from './resolveCookieOptions'
 
 // Handles token refresh flow:
 // - attempts refresh using refresh_token
@@ -16,7 +19,11 @@ import { attachAuthContext } from './attachAuthContext'
 //
 // Throws:
 // - 401 error for non-HTML requests (API)
-export async function handleRefreshFlow(event: H3Event, isHtml: boolean): Promise<boolean> {
+export async function handleRefreshFlow(
+  event: H3Event,
+  isHtml: boolean,
+  config: ResolvedModuleOptions,
+): Promise<boolean> {
   // Attempt to refresh tokens via IdP
   const refreshed = await refreshToken(event)
 
@@ -43,24 +50,22 @@ export async function handleRefreshFlow(event: H3Event, isHtml: boolean): Promis
   await attachAuthContext(event, payload)
 
   // Update access token cookie
-  setCookie(event, 'kc_access', refreshed.access_token, {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: true,
-    maxAge: refreshed.expires_in,
-    path: '/',
-  })
+  setCookie(
+    event,
+    COOKIE_NAMES.ACCESS,
+    refreshed.access_token,
+    resolveCookieOptions(config, refreshed.expires_in),
+  )
 
   // Update refresh token cookie only if provided
   // → avoids overwriting with undefined
   if (refreshed.refresh_token) {
-    setCookie(event, 'kc_refresh', refreshed.refresh_token, {
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: true,
-      maxAge: refreshed.refresh_expires_in,
-      path: '/',
-    })
+    setCookie(
+      event,
+      COOKIE_NAMES.REFRESH,
+      refreshed.refresh_token,
+      resolveCookieOptions(config, refreshed.refresh_expires_in),
+    )
   }
 
   return true

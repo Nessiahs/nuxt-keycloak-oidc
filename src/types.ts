@@ -5,6 +5,12 @@ export interface ModuleOptions {
   clientId?: string
   clientSecret?: string
   mode?: 'protect-all' | 'protect-selected'
+  cookie?: {
+    sameSite?: 'lax' | 'none' | 'strict'
+    secure?: boolean
+    path?: string
+    domain?: string
+  }
 }
 
 export interface ResolvedModuleOptions {
@@ -14,6 +20,12 @@ export interface ResolvedModuleOptions {
   clientId: string
   clientSecret?: string
   mode: 'protect-all' | 'protect-selected'
+  cookie: {
+    sameSite: 'lax' | 'none' | 'strict'
+    secure?: boolean
+    path: string
+    domain?: string
+  }
 }
 
 declare module '@nuxt/schema' {

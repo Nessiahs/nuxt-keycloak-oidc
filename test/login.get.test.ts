@@ -1,9 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { setKeycloakConfig } from './utils/setKeycloakConfig'
-
-// --- HOISTED MOCKS ---
-// eslint-disable-next-line no-empty-pattern
-const {} = vi.hoisted(() => ({}))
+import { COOKIE_NAMES } from '../src/runtime/constants/cookies'
 
 // --- MODULE MOCKS ---
 vi.mock('../src/runtime/utils/keycloakDiscovery', () => ({
@@ -31,9 +28,13 @@ describe('auth login handler', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
 
-    // 🔥 config reset (public client by default)
     setKeycloakConfig({
       clientId: 'test-client',
+      cookie: {
+        sameSite: 'lax',
+        path: '/',
+        secure: true,
+      },
     })
 
     const discoveryModule = await import('../src/runtime/utils/keycloakDiscovery')
@@ -47,7 +48,6 @@ describe('auth login handler', () => {
     mockSetCookie = h3.setCookie
     mockSendRedirect = h3.sendRedirect
 
-    // --- setup mocks ---
     mockGetKeycloakDiscovery.mockResolvedValue({
       authorization_endpoint: 'https://keycloak.test/auth',
     })
@@ -62,9 +62,7 @@ describe('auth login handler', () => {
   // REDIRECT
   // ---------------------------------------------------------------------------
   it('redirects to keycloak with correct params', async () => {
-    const event = {} as any
-
-    await handler(event)
+    await handler({} as any)
 
     expect(mockSendRedirect).toHaveBeenCalledTimes(1)
 
@@ -74,26 +72,33 @@ describe('auth login handler', () => {
     expect(redirectUrl).toContain('client_id=test-client')
     expect(redirectUrl).toContain('response_type=code')
     expect(redirectUrl).toContain('code_challenge_method=S256')
-    expect(redirectUrl).toContain('redirect_uri=https%3A%2F%2Fexample.com%2Fapi%2Fauth%2Fcallback')
+    expect(redirectUrl).toContain('redirect_uri=https%3A%2F%2Fexample.com%2Fapi%2F_oidc%2Fcallback')
   })
 
   // ---------------------------------------------------------------------------
   // COOKIES
   // ---------------------------------------------------------------------------
   it('sets state and verifier cookies', async () => {
-    const event = {} as any
-
-    await handler(event)
+    await handler({} as any)
 
     expect(mockSetCookie).toHaveBeenCalledTimes(2)
 
     const calls = mockSetCookie.mock.calls
 
-    expect(calls[0][1]).toBe('kc_state')
-    expect(calls[1][1]).toBe('kc_verifier')
+    expect(calls[0][1]).toBe(COOKIE_NAMES.STATE)
+    expect(calls[1][1]).toBe(COOKIE_NAMES.VERIFIER)
 
     expect(calls[0][2]).toBeTruthy()
     expect(calls[1][2]).toBeTruthy()
+
+    // check cookie options (indirect resolveCookieOptions test)
+    expect(calls[0][3]).toMatchObject({
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: true,
+      path: '/',
+      maxAge: 300,
+    })
   })
 
   // ---------------------------------------------------------------------------
