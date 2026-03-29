@@ -1,0 +1,63 @@
+{
+  "realm": "nuxt-keycloak",
+  "enabled": true,
+
+  "clients": [
+    {
+      "clientId": "nuxt-public",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+
+      "redirectUris": [
+        "http://localhost:3000/*"
+      ],
+      "webOrigins": [
+        "http://localhost:3000"
+      ],
+
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "implicitFlowEnabled": false,
+
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      }
+    },
+
+    {
+      "clientId": "nuxt-confidential",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "super-secret",
+      "protocol": "openid-connect",
+
+      "redirectUris": [
+        "http://localhost:3000/*"
+      ],
+      "webOrigins": [
+        "http://localhost:3000"
+      ],
+
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "implicitFlowEnabled": false
+    }
+  ],
+
+  "users": [
+    {
+      "username": "test",
+      "enabled": true,
+      "emailVerified": true,
+
+      "credentials": [
+        {
+          "type": "password",
+          "value": "test",
+          "temporary": false
+        }
+      ]
+    }
+  ]
+}

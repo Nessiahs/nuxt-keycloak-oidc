@@ -1,0 +1,47 @@
+version: "3.9"
+
+services:
+  keycloak_db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: kc
+      POSTGRES_USER: kc
+      POSTGRES_PASSWORD: kc
+
+    volumes:
+      - keycloak_db_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kc"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    depends_on:
+      keycloak_db:
+        condition: service_healthy
+
+    command: start-dev --import-realm
+
+    environment:
+      KC_DB: postgres
+      KC_DB_URL_HOST: keycloak_db
+      KC_DB_URL_DATABASE: kc
+      KC_DB_USERNAME: kc
+      KC_DB_PASSWORD: kc
+
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+
+    ports:
+      - "8080:8080"
+
+    volumes:
+      - ./realms:/opt/keycloak/data/import
+
+volumes:
+  keycloak_db_data:

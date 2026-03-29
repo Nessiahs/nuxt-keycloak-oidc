@@ -5,6 +5,12 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   compatibilityDate: 'latest',
   keycloak: {
-    enabled: false
+    enabled: true,
+    url: 'http://localhost:8080',
+    realm: 'nuxt-keycloak',
+    clientId: 'nuxt-confidential',
+    clientSecret: 'super-secret',
+    mode: 'protect-all',
+
   },
 })
