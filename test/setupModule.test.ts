@@ -160,3 +160,81 @@ describe('setupModule', () => {
     ).not.toThrow()
   })
 })
+
+describe('route registration', () => {
+  let addServerHandlerMock: any
+  let addPluginMock: any
+  beforeEach(async () => {
+    vi.resetModules()
+    vi.clearAllMocks()
+
+    addServerHandlerMock = vi.fn()
+    addPluginMock = vi.fn()
+    vi.doMock('@nuxt/kit', async (importOriginal) => {
+      const actual = await importOriginal<any>()
+
+      return {
+        ...actual,
+        addPlugin: addPluginMock,
+        addServerHandler: addServerHandlerMock,
+        createResolver: () => ({
+          resolve: (p: string) => p,
+        }),
+      }
+    })
+  })
+
+  it('registers keycloak runtime plugin', async () => {
+    const module = await import('../src/module')
+
+    await module.default(
+      {
+        enabled: true,
+        url: 'http://localhost',
+        realm: 'test',
+        clientId: 'client',
+        mode: 'protect-all',
+      },
+      {
+        options: {
+          runtimeConfig: {},
+        },
+      } as any,
+    )
+
+    expect(addPluginMock).toHaveBeenCalledTimes(1)
+
+    expect(addPluginMock).toHaveBeenCalledWith(expect.stringContaining('./runtime/plugin'))
+  })
+
+  it('registers all auth routes and middleware', async () => {
+    const module = await import('../src/module')
+
+    await module.default(
+      {
+        enabled: true,
+        url: 'http://localhost',
+        realm: 'test',
+        clientId: 'client',
+        mode: 'protect-all',
+      },
+      {
+        options: {
+          runtimeConfig: {},
+        },
+      } as any,
+    )
+
+    const calls = addServerHandlerMock.mock.calls
+
+    expect(calls).toEqual(
+      expect.arrayContaining([
+        [expect.objectContaining({ route: '/api/_oidc/login' })],
+        [expect.objectContaining({ route: '/api/_oidc/callback' })],
+        [expect.objectContaining({ route: '/api/_oidc/logout' })],
+        [expect.objectContaining({ route: '/api/_oidc/debug' })],
+        [expect.objectContaining({ middleware: true })],
+      ]),
+    )
+  })
+})
