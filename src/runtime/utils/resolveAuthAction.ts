@@ -3,7 +3,7 @@ export type AuthAction = 'allow' | 'unauthorized' | 'redirect'
 // Route-level configuration for Keycloak protection
 // Defined via Nuxt routeRules
 export type KeycloakRouteRules = {
-  keycloak?: boolean
+  auth?: boolean
 }
 
 export type DecisionInput = {
@@ -20,7 +20,7 @@ export type AuthDecision = {
 
 // Resolves how a request should be handled based on:
 // - global module mode (protect-all vs protect-selected)
-// - route-level overrides (rules.keycloak)
+// - route-level overrides (rules.auth)
 // - request type (HTML vs API)
 //
 // This function is the central decision engine of the auth flow.
@@ -28,7 +28,7 @@ export function resolveAuthAction(input: DecisionInput): AuthDecision {
   const { rules = {}, mode, accept = '' } = input
 
   // Extract route-level flag (can be true | false | undefined)
-  const keycloak = rules.keycloak
+  const keycloak = rules.auth
 
   // Determine whether the route is protected:
   // - protect-all: everything protected unless explicitly disabled
