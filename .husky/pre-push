@@ -2,9 +2,9 @@
 
 branch=$(git rev-parse --abbrev-ref HEAD)
 
-if ! echo "$branch" | grep -E "^(feat|fix|chore|docs|refactor|test)/"; then
+if ! echo "$branch" | grep -E "^(feat|fix|chore|docs|refactor|test|ci)/"; then
   echo "❌ Invalid branch name: $branch"
-  echo "Use: feat/*, fix/*, chore/*, docs/*, refactor/*, test/*"
+  echo "Use: feat/*, fix/*, chore/*, docs/*, refactor/*, test/*, ci/*"
   exit 1
 fi
 

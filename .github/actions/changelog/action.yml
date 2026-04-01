@@ -195,13 +195,13 @@ runs:
           exit 0
         fi
 
-        NEXT_RELEASE=$(grep -oP 'Published release \K[0-9]+\.[0-9]+\.[0-9]+' release.log || true)
+        VERSION=$(grep -oE '[0-9]+\.[0-9]+\.[0-9]+' release.log | head -n1)
 
-        if [ -z "$NEXT_RELEASE" ]; then
+        if [ -z "$VERSION" ]; then
           echo "version=" >> $GITHUB_OUTPUT
         else
-          echo "version=$NEXT_RELEASE" >> $GITHUB_OUTPUT
-          echo "📦 Released version: $NEXT_RELEASE"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "📦 Released version: $VERSION"
         fi
 
     # -------------------------------------------------------------------------
