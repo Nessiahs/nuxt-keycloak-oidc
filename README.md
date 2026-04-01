@@ -9,6 +9,8 @@ Find and replace all on all files (CMD+SHIFT+F):
 
 # nuxt-keycloak-oidc
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/bec62e4693dc4624b32107236b8e2731)](https://app.codacy.com/gh/Nessiahs/nuxt-keycloak-oidc?utm_source=github.com&utm_medium=referral&utm_content=Nessiahs/nuxt-keycloak-oidc&utm_campaign=Badge_Grade)
+
 [![npm version][npm-version-src]][npm-version-href]
 [![npm downloads][npm-downloads-src]][npm-downloads-href]
 [![License][license-src]][license-href]
