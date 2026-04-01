@@ -9,19 +9,12 @@ Find and replace all on all files (CMD+SHIFT+F):
 
 # nuxt-keycloak-oidc
 
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/bad231b7991d4968a11f847fe50f88f5)](https://app.codacy.com/gh/Nessiahs/nuxt-keycloak-oidc/dashboard)
+[![Codacy Badge](https://app.codacy.com/project/badge/Coverage/bad231b7991d4968a11f847fe50f88f5)](https://app.codacy.com/gh/Nessiahs/nuxt-keycloak-oidc/dashboard)
 
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/bad231b7991d4968a11f847fe50f88f5)](https://app.codacy.com/gh/Nessiahs/nuxt-keycloak-oidc/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
-[![Codacy Badge](https://app.codacy.com/project/badge/Coverage/bad231b7991d4968a11f847fe50f88f5)](https://app.codacy.com/gh/Nessiahs/nuxt-keycloak-oidc/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_coverage)
-<!--
-[![npm version][npm-version-src]][npm-version-href]
-[![npm downloads][npm-downloads-src]][npm-downloads-href]
-[![License][license-src]][license-href]
-[![Nuxt][nuxt-src]][nuxt-href]
--->
+🔐 Keycloak authentication for Nuxt using OAuth2 / OpenID Connect (OIDC) with PKCE.
 
-🔐 Keycloak authentication for Nuxt 4 using OAuth2 / OpenID Connect (OIDC) with PKCE.
-
-This module provides a fully server-driven authentication flow with secure cookies, automatic token refresh, and configurable route protection.
+This module provides a fully server-driven authentication flow with secure cookies, automatic token refresh, and flexible route protection.
 
 ---
 
@@ -30,9 +23,9 @@ This module provides a fully server-driven authentication flow with secure cooki
 - 🔐 Full OIDC Authorization Code Flow (with PKCE)
 - 🍪 Secure, configurable cookie handling
 - 🔄 Automatic access token refresh
-- 🛡 Route protection (`protect-all` or `protect-selected`)
+- 🛡 Route protection (`protect-all` / `protect-selected`)
 - ⚙️ Runtime config + ENV support
-- 🧪 Built-in debug endpoint (dev only)
+- 🧪 Debug endpoint (dev only)
 - 🌍 Works across modern browsers (incl. Safari)
 
 ---
@@ -43,12 +36,14 @@ This module provides a fully server-driven authentication flow with secure cooki
 npm install nuxt-keycloak-oidc
 ```
 
+---
+
 ## ⚙️ Setup
 
-Add the module to your nuxt.config.ts:
+Add the module to your `nuxt.config.ts`:
 
 ```ts
- export default defineNuxtConfig({
+export default defineNuxtConfig({
   modules: ['nuxt-keycloak-oidc'],
 
   keycloak: {
@@ -57,20 +52,17 @@ Add the module to your nuxt.config.ts:
     realm: 'your-realm',
     clientId: 'your-client-id',
 
-    // Optional (for confidential clients)
     clientSecret: 'your-client-secret',
 
-    mode: 'protect-all', // or 'protect-selected'
+    mode: 'protect-all',
 
     cookie: {
       sameSite: 'lax',
       path: '/',
-      // secure: true,
-      // domain: '.example.com',
     },
   },
 })
- ```
+```
 
 ## 🔐 Authentication Flow
 
@@ -82,24 +74,22 @@ That's it! You can now use My Module in your Nuxt app ✨
 User → /api/_oidc/login → Keycloak → /api/_oidc/callback → App
 ```
 
-## Internal endpoints
+### Internal Endpoints
 
-  -	/api/_oidc/login
-  -	/api/_oidc/callback
-  -	/api/_oidc/logout
-  -	/api/_oidc/debug (dev only)
+- `/api/_oidc/login`
+- `/api/_oidc/callback`
+- `/api/_oidc/logout`
+- `/api/_oidc/debug` (dev only)
 
 ## 🛡 Route Protection
 
-Protect all routes (default)
+### Protect all routes (default)
 
 ```ts
 keycloak: {
   mode: 'protect-all'
 }
 ```
-All pages are protected except internal auth endpoints.
-
 
 Protect selected routes
 
@@ -107,17 +97,35 @@ Protect selected routes
 keycloak: {
   mode: 'protect-selected'
 }
- ```
-You must manually apply protection via middleware.
+```
+
+---
+
+## 🛣 Route Rules (Advanced)
+
+```ts
+export default defineNuxtConfig({
+  routeRules: {
+    '/public/**': { keycloak: false },
+    '/admin/**': { keycloak: true },
+  },
+})
+```
+
+- keycloak: true → protected
+- keycloak: false → public
 
 ## 🍪 Cookie Configuration
+
 Default:
+
 ```ts
 cookie: {
   sameSite: 'lax',
   path: '/',
 }
 ```
+
 Available options:
 
 ```ts
@@ -129,38 +137,9 @@ cookie?: {
 }
 ```
 
-## 🛣 Route Rules (Advanced)
-
-In addition to middleware-based protection, authentication can be controlled via Nuxt `routeRules`.
-
-This allows fine-grained access control directly in `nuxt.config.ts`.
-
-### Example
-
-```ts
-export default defineNuxtConfig({
-  routeRules: {
-    '/public/**': { auth: false },   // disable authentication
-    '/admin/**': { auth: true },     // enforce authentication
-  },
-})
-```
-
-### Behavior
-
-  -	auth: true → route requires authentication
-    -	auth: false → route is always public (skips auth middleware)
-
-### Notes
-
-  - routeRules take precedence over mode
-  - Works in combination with:
-  - protect-all
-  - protect-selected
+---
 
 ## ⚠️ Browser Compatibility
-
-Important: sameSite="none"
 
 If you use:
 
@@ -168,85 +147,18 @@ If you use:
 sameSite: 'none'
 ```
 
-you MUST also set:
+
+you must also set:
 
 ```ts
 secure: true
 ```
-Otherwise cookies will be silently dropped by browsers (especially Safari), causing authentication failures (e.g. redirect loops).
 
-## ✅ Recommended (default)
-
-```ts
-sameSite: 'lax'
-```
-
-Works for:
-
-  -	Local development
-  -	Standard OIDC login flows
-  -	All modern browsers
-
-## 🌍 Cross-domain setups
-
-Use only when required:
-
-```ts
-cookie: {
-  sameSite: 'none',
-  secure: true,
-  domain: '.example.com',
-}
-```
-
-## 🔄 Token Handling
-
-  - Access token stored in kc_access
-  - Refresh token stored in kc_refresh
-  - Tokens are stored as httpOnly cookies
-  - Automatic refresh handled server-side
-
-No client-side SDK required.
-
-## 🔁 Refresh Flow
-
-  - Refresh is triggered automatically when access token expires
-  - New tokens are verified before being applied
-  - Cookies are updated atomically
-
-## 🧪 Debug Endpoint (Development Only)
-
-```bash
-GET /api/_oidc/debug
-```
-
-Provides insight into:
-
-  -	resolved configuration
-  -	cookie settings
-  -	session state
-  -	security hints
-
-## 🧠 Debugging
-
-Redirect loop?
-
-Check:
-1.	Open DevTools → Application → Cookies
-2.	Verify cookies exist:
-   -	kc_access
-   -	kc_refresh
-
-```ts
-sameSite: 'none',
-secure: false ❌
-```
+Otherwise, cookies may be dropped (Safari), causing redirect loops.
 
 ## 🔧 Environment Variables
 
-All options can be provided via runtime config:
-
-``ènv
+```env
 NUXT_KEYCLOAK_URL=http://localhost:8080
 NUXT_KEYCLOAK_REALM=your-realm
 NUXT_KEYCLOAK_CLIENT_ID=your-client-id
@@ -255,49 +167,36 @@ NUXT_KEYCLOAK_COOKIE_SAME_SITE=none
 NUXT_KEYCLOAK_COOKIE_SECURE=true
 NUXT_KEYCLOAK_COOKIE_PATH=/
 NUXT_KEYCLOAK_COOKIE_DOMAIN=.example.com
-``
+
+```
 
 ## 🔄 Handling API Authentication (Optional)
 
-This module does not override `useFetch` globally.
-
-Instead, you can use a helper composable:
-
 ```ts
-const { data, error } = await useKeycloakFetch('/api/protected')
+const { data } = await useFetchApi('/api/protected')
 ```
 
-Behavior
-  - Automatically redirects to login on 401 responses (browser requests)
-  - Leaves full control to the developer
+- Redirects to login on 401
+- Fully optional
 
-### Custom Integration
-
-You can also integrate the logic into your own fetch layer:
 
 ```ts
 useFetch('/api/protected', {
   onResponseError({ response }) {
     if (response.status === 401) {
-      window.location.href = '/api/_oidc/login'
+      navigateTo('/api/_oidc/login', { external: true })
     }
   }
 })
 ```
+
 ## 🏗 Architecture
-	•	Server-only authentication
-	•	No client SDK required
-	•	Secure httpOnly cookies
-	•	Middleware-based route protection
-	•	Runtime config as single source of truth
 
-## 🚀 Production Notes
-	•	Always use HTTPS in production
-	•	Set cookie.secure = true
-	•	Use sameSite: 'none' only when necessary
-	•	Configure cookie.domain for multi-subdomain setups
-
-
+- Server-only authentication
+- No client SDK
+- httpOnly cookies
+- Middleware-based protection
+- Runtime config as source of truth
 
 ## 📄 License
 
