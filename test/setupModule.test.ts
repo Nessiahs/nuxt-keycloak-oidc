@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import setupModule from '../src/setupModule'
+import { OIDC_ROUTES } from '../src/runtime/constants/path'
 
 // Helper to generate a valid base configuration
 // Allows overriding specific fields to test edge cases
@@ -255,10 +256,10 @@ describe('route registration', () => {
 
     expect(calls).toEqual(
       expect.arrayContaining([
-        [expect.objectContaining({ route: '/api/_oidc/login' })],
-        [expect.objectContaining({ route: '/api/_oidc/callback' })],
-        [expect.objectContaining({ route: '/api/_oidc/logout' })],
-        [expect.objectContaining({ route: '/api/_oidc/debug' })],
+        [expect.objectContaining({ route: OIDC_ROUTES.login })],
+        [expect.objectContaining({ route: OIDC_ROUTES.callback })],
+        [expect.objectContaining({ route: OIDC_ROUTES.logout })],
+        [expect.objectContaining({ route: OIDC_ROUTES.debug })],
         [expect.objectContaining({ middleware: true })],
       ]),
     )

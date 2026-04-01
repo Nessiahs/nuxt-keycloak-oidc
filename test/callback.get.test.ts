@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { setKeycloakConfig } from './utils/setKeycloakConfig'
+import { OIDC_ROUTES } from '../src/runtime/constants/path'
 
 // --- HOISTED MOCKS ---
 const { mockFetch } = vi.hoisted(() => ({
@@ -112,7 +113,7 @@ describe('auth callback handler', () => {
 
     await handler(event)
 
-    expect(h3.sendRedirect).toHaveBeenCalledWith(event, '/api/_oidc/login')
+    expect(h3.sendRedirect).toHaveBeenCalledWith(event, OIDC_ROUTES.login)
   })
 
   // ---------------------------------------------------------------------------
@@ -128,7 +129,7 @@ describe('auth callback handler', () => {
 
     await handler(event)
 
-    expect(h3.sendRedirect).toHaveBeenCalledWith(event, '/api/_oidc/login')
+    expect(h3.sendRedirect).toHaveBeenCalledWith(event, OIDC_ROUTES.login)
   })
 
   // ---------------------------------------------------------------------------
@@ -159,7 +160,7 @@ describe('auth callback handler', () => {
 
     await handler(event)
 
-    expect(h3.sendRedirect).toHaveBeenCalledWith(event, '/api/_oidc/login')
+    expect(h3.sendRedirect).toHaveBeenCalledWith(event, OIDC_ROUTES.login)
   })
 
   // ---------------------------------------------------------------------------

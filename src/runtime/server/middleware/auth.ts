@@ -6,6 +6,7 @@ import { resolveAuthAction } from '../../utils/resolveAuthAction'
 import { resolveTokenState } from '../../utils/resolveTokenState'
 import { handleRefreshFlow } from '../../utils/handleRefreshFlow'
 import { handleUnauthorized } from '../../utils/handleUnauthorized'
+import { OIDC_BASE_PATH } from '../../constants/path'
 
 // Global authentication middleware for protecting routes.
 // Handles:
@@ -18,7 +19,7 @@ export default defineEventHandler(async (event) => {
 
   // Skip internal OIDC endpoints (login, callback, etc.)
   // to avoid infinite redirect loops
-  if (url.pathname.startsWith('/api/_oidc/')) {
+  if (url.pathname.startsWith(OIDC_BASE_PATH)) {
     return
   }
 

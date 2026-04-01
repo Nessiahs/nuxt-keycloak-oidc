@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { setKeycloakConfig } from './utils/setKeycloakConfig'
 import middleware from '../src/runtime/server/middleware/auth'
+import { OIDC_ROUTES } from '../src/runtime/constants/path'
 
 // ---------------- HOISTED MOCKS ----------------
 const {
@@ -70,7 +71,7 @@ describe('auth middleware', () => {
   // SKIP INTERNAL ROUTES
   // ---------------------------------------------------------------------------
   it('skips internal oidc routes', async () => {
-    mockGetRequestURL.mockReturnValue({ pathname: '/api/_oidc/login' })
+    mockGetRequestURL.mockReturnValue({ pathname: OIDC_ROUTES.login })
 
     await middleware(event)
 
