@@ -6,6 +6,7 @@ import { getKeycloakDiscovery } from '../../../utils/keycloakDiscovery'
 import type { ResolvedModuleOptions } from '../../../../types'
 import { COOKIE_NAMES } from '../../../constants/cookies'
 import { resolveCookieOptions } from '../../../utils/resolveCookieOptions'
+import { OIDC_ROUTES } from '../../../constants/path'
 
 // Initiates the Keycloak OAuth2/OIDC login flow.
 // Generates PKCE values and state, stores them in secure cookies,
@@ -40,7 +41,7 @@ export default defineEventHandler(async (event: H3Event) => {
   // In production environments, consider configuring a fixed base URL
   // to avoid relying on potentially untrusted host headers.
   const baseUrl = `${url.protocol}//${url.host}`
-  const redirect = new URL('/api/_oidc/callback', baseUrl).toString()
+  const redirect = new URL(OIDC_ROUTES.callback, baseUrl).toString()
 
   // Build authorization request parameters
   const authParams = new URLSearchParams({

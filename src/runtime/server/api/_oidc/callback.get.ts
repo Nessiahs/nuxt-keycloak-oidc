@@ -18,6 +18,7 @@ import type { KeycloakTokenResponse } from '../../../../types/keycloak.types'
 import { COOKIE_NAMES } from '../../../constants/cookies'
 
 import { resolveCookieOptions } from '../../../utils/resolveCookieOptions'
+import { OIDC_ROUTES } from '../../../constants/path'
 
 export default defineEventHandler(async (event: H3Event) => {
   const runtimeConfig = useRuntimeConfig()
@@ -32,7 +33,7 @@ export default defineEventHandler(async (event: H3Event) => {
   const verifier = getCookie(event, COOKIE_NAMES.VERIFIER)
 
   if (!code || !state || !storedState || state !== storedState || !verifier) {
-    return sendRedirect(event, '/api/_oidc/login')
+    return sendRedirect(event, OIDC_ROUTES.login)
   }
 
   const usedCode = getCookie(event, COOKIE_NAMES.CODE_USED)
@@ -44,7 +45,7 @@ export default defineEventHandler(async (event: H3Event) => {
   setCookie(event, COOKIE_NAMES.CODE_USED, code, resolveCookieOptions(config, 6000))
   const url = getRequestURL(event)
 
-  const redirectUri = `${url.protocol}//${url.host}/api/_oidc/callback`
+  const redirectUri = `${url.protocol}//${url.host}${OIDC_ROUTES.callback}`
 
   const body = new URLSearchParams({
     grant_type: 'authorization_code',
@@ -94,6 +95,6 @@ export default defineEventHandler(async (event: H3Event) => {
 
     return sendRedirect(event, userRedirectUri)
   } catch {
-    return sendRedirect(event, '/api/_oidc/login')
+    return sendRedirect(event, OIDC_ROUTES.login)
   }
 })

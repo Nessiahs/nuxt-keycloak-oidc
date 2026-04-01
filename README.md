@@ -253,6 +253,33 @@ NUXT_KEYCLOAK_COOKIE_PATH=/
 NUXT_KEYCLOAK_COOKIE_DOMAIN=.example.com
 ``
 
+## 🔄 Handling API Authentication (Optional)
+
+This module does not override `useFetch` globally.
+
+Instead, you can use a helper composable:
+
+```ts
+const { data, error } = await useKeycloakFetch('/api/protected')
+```
+
+Behavior
+  - Automatically redirects to login on 401 responses (browser requests)
+  - Leaves full control to the developer
+
+### Custom Integration
+
+You can also integrate the logic into your own fetch layer:
+
+```ts
+useFetch('/api/protected', {
+  onResponseError({ response }) {
+    if (response.status === 401) {
+      window.location.href = '/api/_oidc/login'
+    }
+  }
+})
+```
 ## 🏗 Architecture
 	•	Server-only authentication
 	•	No client SDK required
@@ -265,6 +292,8 @@ NUXT_KEYCLOAK_COOKIE_DOMAIN=.example.com
 	•	Set cookie.secure = true
 	•	Use sameSite: 'none' only when necessary
 	•	Configure cookie.domain for multi-subdomain setups
+
+
 
 ## 📄 License
 

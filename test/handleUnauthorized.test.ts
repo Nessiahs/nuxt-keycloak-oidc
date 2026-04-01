@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { handleUnauthorized } from '../src/runtime/utils/handleUnauthorized'
+import { OIDC_ROUTES } from '../src/runtime/constants/path'
 
 // ---------------- HOISTED MOCKS ----------------
 const { mockCreateError, mockSendRedirect, mockSetRedirectCookie } = vi.hoisted(() => ({
@@ -42,7 +43,7 @@ describe('handleUnauthorized', () => {
     handleUnauthorized({} as any, true)
 
     expect(mockSetRedirectCookie).toHaveBeenCalledTimes(1)
-    expect(mockSendRedirect).toHaveBeenCalledWith(expect.anything(), '/api/_oidc/login')
+    expect(mockSendRedirect).toHaveBeenCalledWith(expect.anything(), OIDC_ROUTES.login)
   })
 
   // ---------------------------------------------------------------------------

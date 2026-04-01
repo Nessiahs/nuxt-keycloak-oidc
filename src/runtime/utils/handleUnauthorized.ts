@@ -1,6 +1,7 @@
 import type { H3Event } from 'h3'
 import { createError, sendRedirect } from 'h3'
 import { setRedirectCookie } from './setRedirectCookie'
+import { OIDC_ROUTES } from '../constants/path'
 
 // Handles unauthorized requests depending on request type:
 //
@@ -20,5 +21,5 @@ export function handleUnauthorized(event: H3Event, isHtml: boolean) {
   setRedirectCookie(event)
 
   // Redirect user to login flow
-  return sendRedirect(event, '/api/_oidc/login')
+  return sendRedirect(event, OIDC_ROUTES.login)
 }

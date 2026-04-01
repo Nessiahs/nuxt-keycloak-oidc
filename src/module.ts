@@ -1,6 +1,7 @@
 import { defineNuxtModule, addPlugin, createResolver, addServerHandler } from '@nuxt/kit'
 import type { ModuleOptions, ResolvedModuleOptions } from './types'
 import setupModule from './setupModule'
+import { OIDC_ROUTES } from './runtime/constants/path'
 
 export default defineNuxtModule<ModuleOptions>({
   meta: {
@@ -83,22 +84,22 @@ export default defineNuxtModule<ModuleOptions>({
     addPlugin(resolver.resolve('./runtime/plugin'))
 
     addServerHandler({
-      route: '/api/_oidc/login',
+      route: OIDC_ROUTES.login,
       handler: resolver.resolve('./runtime/server/api/_oidc/login.get.ts'),
     })
 
     addServerHandler({
-      route: '/api/_oidc/callback',
+      route: OIDC_ROUTES.callback,
       handler: resolver.resolve('./runtime/server/api/_oidc/callback.get.ts'),
     })
 
     addServerHandler({
-      route: '/api/_oidc/logout',
+      route: OIDC_ROUTES.logout,
       handler: resolver.resolve('./runtime/server/api/_oidc/logout.get.ts'),
     })
 
     addServerHandler({
-      route: '/api/_oidc/debug',
+      route: OIDC_ROUTES.debug,
       handler: resolver.resolve('./runtime/server/api/_oidc/debug.get.ts'),
     })
 
