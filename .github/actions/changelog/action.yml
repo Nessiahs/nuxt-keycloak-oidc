@@ -195,14 +195,16 @@ runs:
           exit 0
         fi
 
+        if ! grep -q "Published release" release.log; then
+        echo "No release created"
+        echo "version=" >> $GITHUB_OUTPUT
+        exit 0
+        fi
+
         VERSION=$(grep "Published release" release.log | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
 
-        if [ -z "$VERSION" ]; then
-          echo "version=" >> $GITHUB_OUTPUT
-        else
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "📦 Released version: $VERSION"
-        fi
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "📦 Released version: $VERSION"
 
     # -------------------------------------------------------------------------
     # Step 10: Upload Changelog Artifact
