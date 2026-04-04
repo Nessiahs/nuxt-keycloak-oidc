@@ -1,3 +1,50 @@
+## 🚀 Version 1.0.0 (2026-04-04)
+
+### 📚 Documentation
+* add codeacy badges (13cb804cfc4cb9d20ba6ed0c9a8460b7c10b7f16)
+* changelog version ([#23](https://github.com/Nessiahs/nuxt-keycloak-oidc/issues/23)) (0b3590c6cce0ea9592ec6ef892dd0e0a0b04a9ee)
+* update changelog [skip ci] (2aea5194ef39f50dabf094ddf14094985da7f2a1)
+* improve code comments for module setup and validation (1eb8872ab84b5f9eec40c9972b3ffb9ae2044892)
+* improve README with route protection and env cookie configuration (b46078fb126a9b5213f48a95a82765cfd2b04621)
+* reorganize README into smaller sections for incremental updates (68ead9921a735f8f74df922c06f9fc847bd7879a)
+
+### 🚀 Features
+* add configurable cookie handling and improve logging (25cff75c374cafd6ed8ed81081f63903ae78e35c)
+* add debug API and tests for route, middleware and plugin wiring (471f270695687e7f21dd2789fc3290998dbbbc55)
+* add docker-compose setup with keycloak and postgres for local development (75f85412c63dec0441a8344edd788794beaef8d8)
+* add fetch composable and update README (6b13ec1664132cc49b99bc9288a3493a08f81f02)
+* add server route registration for auth handlers in module setup (6418b1e8d94918af5388ae8d381f1198f181e99e)
+* add auth context hook system with plugin bridge and typing support (8be4848193b92f4f216499166db44cbf42f757f0)
+* add isTokenValid helper with expiration handling and tests (a8f9465826f4c77fae682aa58bbe59404e1f7df6)
+* add logout handler with cookie cleanup and OIDC redirect (3dc81b688c69276eb5773629588a0002366357c2)
+* add OAuth callback handler and callback handler tests with edge case (45132e0dea4476a9fe1a038d46063e6a567cb81d)
+* implement complete keycloak auth middleware with refresh and route protection (f22688dd5ed4936e81da894e98390cc90638e521)
+* implement refresh token handling with concurrency deduplication and hashed lock keys (606d857a4e55e5c2732e2a09173163fcadcfe0d9)
+* enable changelog pipeline (79b4a78c1d2011140da6a9e2236365ae08ba3acc)
+* enable changelog pipeline (187dee2fc0d4d39812ff2d2fec8054cd76737dc0)
+* enable coverage (6b420a272042cf2342c608a2e10b403510d544dd)
+* login api (38de19b09f8488b5ca3779ea167b451bb85641f7)
+* module setup (23a7c9cef1184de605ff053b220c63d0d1c6ccdb)
+* refactor cookie handling and improve auth flow consistency (879a234ca6a605389c7bea2cf4a851b88f6586f0)
+
+### 🧠 Refactoring
+* remove keycloak hook from server runtime to avoid [#app](https://github.com/Nessiahs/nuxt-keycloak-oidc/issues/app) dependency (4ec8e8d44e007aa3c61283d2468ff265230adfae)
+* remove unnecessary default values (5cc01f57d7ec5ca994a4de7d84bf7995ee02fa74)
+* replace hardcoded OIDC paths with constants (59353ce913b30361e809d0e67578d3b57961c789)
+
+### 🐛 Fixes
+* action (70a1eb1880d98677e5aff20a9d924406d2bb405c)
+* file format (f43ac27078dea73c0c366001b883ca65ed352929)
+* imports from [#app](https://github.com/Nessiahs/nuxt-keycloak-oidc/issues/app) to [#imports](https://github.com/Nessiahs/nuxt-keycloak-oidc/issues/imports) (0e56d0699840d8acdbe8be1e119d076d0a60d49c)
+* node version (4cc4785a9362456ecc1ecfbe99589e52613670a1)
+* pipeline tests (e94e45534126a671cff8c34e21e080a249ed6ca8)
+* prettier ignore (1c3ec37bc364c7b3d6b521af3ba4ea2551872d49)
+* route rule from kerycloak to auth for better understanding (ba4b322d3fb92b95993329430d4cd1eace7ff69d)
+* type in path (7eabf6d5e7524ee9efe82edb2b2b4000966b6d1e)
+
+### 🧪 Tests
+* replace static mocks with dynamic imports and introduce runtimeConfig test helpers (d1def0d272508cf9b4b86a7e79b06a32af8ef456)
+
 ## 🚀 Version 0.1.0 (2026-04-04)
 
 ### 🚀 Features
