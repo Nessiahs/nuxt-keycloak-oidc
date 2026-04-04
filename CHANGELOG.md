@@ -1,4 +1,4 @@
-## 🚀 Version 1.0.0 (2026-04-04)
+## 🚀 Version 0.1.0 (2026-04-04)
 
 ### 🚀 Features
 * add configurable cookie handling and improve logging (25cff75c374cafd6ed8ed81081f63903ae78e35c)
