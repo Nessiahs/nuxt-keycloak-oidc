@@ -31,36 +31,30 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Commit changelog
-        if: steps.changelog.outputs.changelog != ''
+        if: steps.changelog.outputs.version != ''
         uses: ./.github/actions/commit
         env:
-            VERSION: ${{ steps.changelog.outputs.changelog }}
+            VERSION: ${{ steps.changelog.outputs.version }}
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           message: "docs(changelog): update changelog [skip ci]"
           branch: docs/changelog-${{ env.VERSION }}
+          path: 'CHANGELOG.md'
 
       - name: Create pr for changelog
-        if: steps.changelog.outputs.changelog != ''
+        if: steps.changelog.outputs.version != ''
         id: pr
         env:
-          VERSION: ${{ steps.changelog.outputs.changelog }}
+          VERSION: ${{ steps.changelog.outputs.version }}
         uses: ./.github/actions/pr
         with:
           base: "main"
-          head: docs/changelog-${{ steps.changelog.outputs.changelog }}
-          title: "docs(changelog): update changelog for version ${{ steps.changelog.outputs.changelog }}"
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create Approve pr
-        if: steps.changelog.outputs.changelog != '' && steps.pr.outputs.number != ''
-        uses: ./.github/actions/approve-pr
-        with:
+          head: docs/changelog-${{ steps.changelog.outputs.version }}
+          title: "docs(changelog): update changelog for version ${{ steps.changelog.outputs.version }}"
           token: ${{ secrets.PAT_TOKEN }}
-          number: ${{ steps.pr.outputs.number }}
 
       - name: merge pr
-        if: steps.changelog.outputs.changelog != '' && steps.pr.outputs.number != ''
+        if: steps.changelog.outputs.version != '' && steps.pr.outputs.number != ''
         uses: ./.github/actions/merge
         with:
           token: ${{ secrets.PAT_TOKEN }}
