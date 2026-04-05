@@ -1,3 +1,8 @@
+## 🚀 Version 0.2.1 (2026-04-05)
+
+### 🐛 Fixes
+* package version (92e882d3917b2e4dd4b6958ee1bbeebce7f89802)
+
 ## 🚀 Version 1.0.0 (2026-04-04)
 
 ### 📚 Documentation
