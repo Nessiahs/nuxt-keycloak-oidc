@@ -1,8 +1,30 @@
 {
   "name": "nuxt-keycloak-oidc",
   "version": "0.2.0",
-  "description": "My new Nuxt module",
-  "repository": "your-org/my-module",
+  "description": "Nuxt module for seamless Keycloak authentication using OpenID Connect (OIDC) with SSR support",
+  "homepage": "https://github.com/Nessiahs/nuxt-keycloak-oidc#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Nessiahs/nuxt-keycloak-oidc.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Nessiahs/nuxt-keycloak-oidc/issues"
+  },
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "nuxt",
+    "nuxt-module",
+    "keycloak",
+    "oidc",
+    "openid-connect",
+    "authentication",
+    "oauth2",
+    "ssr",
+    "security"
+  ],
   "license": "MIT",
   "type": "module",
   "exports": {
@@ -30,7 +52,7 @@
     "dev": "npm run dev:prepare && nuxt dev playground",
     "dev:build": "nuxt build playground",
     "dev:prepare": "nuxt-module-build build --stub && nuxt-module-build prepare && nuxt prepare playground",
-    "release": "npm run lint && npm run test && npm run prepack && changelogen --release && npm publish && git push --follow-tags",
+    "release": "npm run lint && npm run test && npm run prepack && npm publish",
     "lint": "eslint src playground --ext .ts,.js,.vue",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
@@ -53,7 +75,6 @@
     "@nuxt/test-utils": "^4.0.0",
     "@types/node": "^20",
     "@vitest/coverage-v8": "^4.1.2",
-    "changelogen": "^0.6.2",
     "eslint": "^10.1.0",
     "eslint-config-prettier": "^10.1.8",
     "husky": "^9.1.7",
@@ -65,7 +86,8 @@
     "vue-tsc": "^3.2.6"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=20.0.0",
+    "npm": ">=9"
   },
   "lint-staged": {
     "*.{js,ts,vue}": [
