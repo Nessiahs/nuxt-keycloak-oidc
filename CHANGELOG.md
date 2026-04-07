@@ -1,3 +1,11 @@
+## 🚀 Version 0.3.0 (2026-04-07)
+
+### 🚀 Features
+* improve documentation and project positioning ([#27](https://github.com/Nessiahs/nuxt-keycloak-oidc/issues/27)) (58e5cbe8bf5b00143f00bda578e4e76e75877983)
+
+### 📚 Documentation
+* update changelog [skip ci] (f1e6266e5733f5e6eb9717cde2df475e3f18244a)
+
 ## 🚀 Version 0.2.1 (2026-04-05)
 
 ### 🐛 Fixes
