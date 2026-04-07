@@ -3,3 +3,5 @@ exclude_paths:
   - "**/*.test.ts"
   - "**/*.spec.ts"
   - "playground/**"
+  - "CHANNGELOG.md"
+  - "package-lock.json"
