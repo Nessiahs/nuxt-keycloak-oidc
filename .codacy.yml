@@ -5,3 +5,4 @@ exclude_paths:
   - "playground/**"
   - "CHANNGELOG.md"
   - "package-lock.json"
+  - "README.md"
