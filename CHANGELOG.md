@@ -1,3 +1,11 @@
+## 🚀 Version 0.4.0 (2026-04-09)
+
+### 🚀 Features
+* enhance README with config defaults, route protection and… ([#29](https://github.com/Nessiahs/nuxt-keycloak-oidc/issues/29)) (a1c6709333f2f05e1868fbbdb69579b6d27a00a5)
+
+### 📚 Documentation
+* update changelog [skip ci] (e2f5258fb0379771436a914949a0b851ecf697cc)
+
 ## 🚀 Version 0.3.0 (2026-04-07)
 
 ### 🚀 Features
