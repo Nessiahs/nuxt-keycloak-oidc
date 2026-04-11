@@ -27,7 +27,7 @@ export default defineEventHandler(async (event) => {
   const config = runtimeConfig.keycloak as ResolvedModuleOptions
 
   // Route rules (Nuxt routeRules integration)
-  const rules = event.context.routeRules || {}
+  const rules = event.context._nitro?.routeRules || {}
 
   // Determine whether the route is protected and what action to take
   const check = resolveAuthAction({
