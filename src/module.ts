@@ -2,6 +2,10 @@ import { defineNuxtModule, addPlugin, createResolver, addServerHandler } from '@
 import type { ModuleOptions, ResolvedModuleOptions } from './types'
 import setupModule from './setupModule'
 import { OIDC_ROUTES } from './runtime/constants/path'
+import { fileURLToPath } from 'node:url'
+import { resolve } from 'pathe'
+
+const runtimeDir = fileURLToPath(new URL('./runtime', import.meta.url))
 
 export default defineNuxtModule<ModuleOptions>({
   meta: {
@@ -85,27 +89,27 @@ export default defineNuxtModule<ModuleOptions>({
 
     addServerHandler({
       route: OIDC_ROUTES.login,
-      handler: resolver.resolve('./runtime/server/api/_oidc/login.get.ts'),
+      handler: resolve(runtimeDir, 'server/api/_oidc/login.get'),
     })
 
     addServerHandler({
       route: OIDC_ROUTES.callback,
-      handler: resolver.resolve('./runtime/server/api/_oidc/callback.get.ts'),
+      handler: resolve(runtimeDir, 'server/api/_oidc/callback.get'),
     })
 
     addServerHandler({
       route: OIDC_ROUTES.logout,
-      handler: resolver.resolve('./runtime/server/api/_oidc/logout.get.ts'),
+      handler: resolve(runtimeDir, 'server/api/_oidc/logout.get'),
     })
 
     addServerHandler({
       route: OIDC_ROUTES.debug,
-      handler: resolver.resolve('./runtime/server/api/_oidc/debug.get.ts'),
+      handler: resolve(runtimeDir, 'server/api/_oidc/debug.get'),
     })
 
     addServerHandler({
       middleware: true,
-      handler: resolver.resolve('./runtime/server/middleware/auth.ts'),
+      handler: resolve(runtimeDir, 'server/middleware/auth'),
     })
   },
 })
