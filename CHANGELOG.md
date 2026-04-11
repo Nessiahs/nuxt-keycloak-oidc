@@ -1,3 +1,11 @@
+## 🚀 Version 0.4.2 (2026-04-11)
+
+### 🐛 Fixes
+* correctly resolve routeRules from nitro context ([#33](https://github.com/Nessiahs/nuxt-keycloak-oidc/issues/33)) (35ceca013914c21545c6c7d311f199ecf55c3da7)
+
+### 📚 Documentation
+* update changelog [skip ci] (51f9b8cc302908b085c65800029b3f5e45f84934)
+
 ## 🚀 Version 0.4.1 (2026-04-11)
 
 ### 🐛 Fixes
