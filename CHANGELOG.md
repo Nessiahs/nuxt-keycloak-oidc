@@ -1,3 +1,11 @@
+## 🚀 Version 0.4.3 (2026-04-11)
+
+### 🐛 Fixes
+* use keycloak flag instead of auth in routeRules ([#35](https://github.com/Nessiahs/nuxt-keycloak-oidc/issues/35)) (be4e59b02f6f2f8a09898438be22a739a991010b)
+
+### 📚 Documentation
+* update changelog [skip ci] (b0ca2e194d494efaca96af5e97a8c52d75f25920)
+
 ## 🚀 Version 0.4.2 (2026-04-11)
 
 ### 🐛 Fixes
