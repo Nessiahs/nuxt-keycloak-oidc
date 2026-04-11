@@ -1,3 +1,11 @@
+## 🚀 Version 0.4.1 (2026-04-11)
+
+### 🐛 Fixes
+* correct runtime path resolution and improve typings ([#31](https://github.com/Nessiahs/nuxt-keycloak-oidc/issues/31)) (bed6ae96e49f5848e091aa49514948f259a97a4c)
+
+### 📚 Documentation
+* update changelog [skip ci] (ea7098af7380330df2852b6b8bad0268a078b979)
+
 ## 🚀 Version 0.4.0 (2026-04-09)
 
 ### 🚀 Features
