@@ -1,3 +1,11 @@
+## 🚀 Version 0.4.4 (2026-04-12)
+
+### 🐛 Fixes
+* resolve origin behind proxy and update tests ([#37](https://github.com/Nessiahs/nuxt-keycloak-oidc/issues/37)) (5891cea2489686c18279b56444f028573c538d81)
+
+### 📚 Documentation
+* update changelog [skip ci] (c1c7f105e375b334dd3e2f3d82162f493aaabbf8)
+
 ## 🚀 Version 0.4.3 (2026-04-11)
 
 ### 🐛 Fixes
