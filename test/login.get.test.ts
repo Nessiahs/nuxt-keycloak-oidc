@@ -12,6 +12,7 @@ vi.mock('h3', async () => {
   return {
     ...actual,
     getRequestURL: vi.fn(),
+    getHeaders: vi.fn(),
     setCookie: vi.fn(),
     sendRedirect: vi.fn(),
     defineEventHandler: (fn: any) => fn,
@@ -22,6 +23,7 @@ describe('auth login handler', () => {
   let handler: any
   let mockGetKeycloakDiscovery: any
   let mockGetRequestURL: any
+  let mockGetHeaders: any
   let mockSetCookie: any
   let mockSendRedirect: any
 
@@ -45,6 +47,7 @@ describe('auth login handler', () => {
 
     mockGetKeycloakDiscovery = discoveryModule.getKeycloakDiscovery
     mockGetRequestURL = h3.getRequestURL
+    mockGetHeaders = h3.getHeaders
     mockSetCookie = h3.setCookie
     mockSendRedirect = h3.sendRedirect
 
@@ -56,6 +59,8 @@ describe('auth login handler', () => {
       protocol: 'https:',
       host: 'example.com',
     })
+
+    mockGetHeaders.mockReturnValue({})
   })
 
   // ---------------------------------------------------------------------------
@@ -72,6 +77,7 @@ describe('auth login handler', () => {
     expect(redirectUrl).toContain('client_id=test-client')
     expect(redirectUrl).toContain('response_type=code')
     expect(redirectUrl).toContain('code_challenge_method=S256')
+
     expect(redirectUrl).toContain('redirect_uri=https%3A%2F%2Fexample.com%2Fapi%2F_oidc%2Fcallback')
   })
 
@@ -91,7 +97,6 @@ describe('auth login handler', () => {
     expect(calls[0][2]).toBeTruthy()
     expect(calls[1][2]).toBeTruthy()
 
-    // check cookie options (indirect resolveCookieOptions test)
     expect(calls[0][3]).toMatchObject({
       httpOnly: true,
       sameSite: 'lax',
@@ -111,6 +116,12 @@ describe('auth login handler', () => {
     const firstState = mockSetCookie.mock.calls[0][2]
 
     vi.clearAllMocks()
+
+    mockGetHeaders.mockReturnValue({})
+    mockGetRequestURL.mockReturnValue({
+      protocol: 'https:',
+      host: 'example.com',
+    })
 
     await handler(event)
     const secondState = mockSetCookie.mock.calls[0][2]
