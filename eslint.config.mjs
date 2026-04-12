@@ -39,5 +39,6 @@ export default createConfigForNuxt({
 
       // console ist in tests ok
       'no-console': 'off',
+      'import/first': 'off',
     },
   })

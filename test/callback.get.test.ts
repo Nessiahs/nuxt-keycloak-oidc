@@ -25,6 +25,7 @@ vi.mock('h3', async () => {
     sendRedirect: vi.fn(),
     setResponseStatus: vi.fn(),
     getRequestURL: vi.fn(),
+    getHeaders: vi.fn(),
     defineEventHandler: (fn: any) => fn,
   }
 })
@@ -62,7 +63,7 @@ describe('auth callback handler', () => {
       state: 'state123',
     })
 
-    h3.getCookie.mockImplementation((_, name) => {
+    h3.getCookie.mockImplementation((_: unknown, name: string) => {
       const cookies: Record<string, string> = {
         kc_state: 'state123',
         kc_verifier: 'verifier123',
@@ -74,6 +75,8 @@ describe('auth callback handler', () => {
       protocol: 'https:',
       host: 'example.com',
     })
+
+    h3.getHeaders.mockReturnValue({})
   })
 
   // ---------------------------------------------------------------------------
@@ -104,7 +107,7 @@ describe('auth callback handler', () => {
   // INVALID STATE
   // ---------------------------------------------------------------------------
   it('rejects invalid state', async () => {
-    h3.getCookie.mockImplementation((_, name) => {
+    h3.getCookie.mockImplementation((_: unknown, name: string) => {
       if (name === 'kc_state') return 'wrong'
       if (name === 'kc_verifier') return 'verifier'
     })
@@ -120,7 +123,7 @@ describe('auth callback handler', () => {
   // MISSING VERIFIER
   // ---------------------------------------------------------------------------
   it('rejects missing verifier', async () => {
-    h3.getCookie.mockImplementation((_, name) => {
+    h3.getCookie.mockImplementation((_: unknown, name: string) => {
       if (name === 'kc_state') return 'state123'
       return undefined
     })
@@ -136,7 +139,7 @@ describe('auth callback handler', () => {
   // REPLAY PROTECTION
   // ---------------------------------------------------------------------------
   it('prevents replay of used code', async () => {
-    h3.getCookie.mockImplementation((_, name) => {
+    h3.getCookie.mockImplementation((_: unknown, name: string) => {
       if (name === 'kc_state') return 'state123'
       if (name === 'kc_verifier') return 'verifier123'
       if (name === 'kc_code_used') return 'abc'
@@ -174,7 +177,7 @@ describe('auth callback handler', () => {
       refresh_expires_in: 3600,
     })
 
-    h3.getCookie.mockImplementation((_, name) => {
+    h3.getCookie.mockImplementation((_: unknown, name: string) => {
       const cookies: Record<string, string> = {
         kc_state: 'state123',
         kc_verifier: 'verifier123',
@@ -201,7 +204,7 @@ describe('auth callback handler', () => {
       refresh_expires_in: 3600,
     })
 
-    h3.getCookie.mockImplementation((_, name) => {
+    h3.getCookie.mockImplementation((_: unknown, name: string) => {
       const cookies: Record<string, string> = {
         kc_state: 'state123',
         kc_verifier: 'verifier123',
