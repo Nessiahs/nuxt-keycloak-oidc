@@ -7,6 +7,7 @@ import { OIDC_ROUTES } from '../src/runtime/constants/path'
 const {
   mockGetRequestURL,
   mockResolveAuthAction,
+  mockResolveRefreshTokenState,
   mockResolveTokenState,
   mockAttachAuthContext,
   mockHandleRefreshFlow,
@@ -15,6 +16,7 @@ const {
 } = vi.hoisted(() => ({
   mockGetRequestURL: vi.fn(),
   mockResolveAuthAction: vi.fn(),
+  mockResolveRefreshTokenState: vi.fn(),
   mockResolveTokenState: vi.fn(),
   mockAttachAuthContext: vi.fn(),
   mockHandleRefreshFlow: vi.fn(),
@@ -34,6 +36,7 @@ vi.mock('../src/runtime/utils/resolveAuthAction', () => ({
 }))
 
 vi.mock('../src/runtime/utils/resolveTokenState', () => ({
+  resolveRefreshTokenState: mockResolveRefreshTokenState,
   resolveTokenState: mockResolveTokenState,
 }))
 
@@ -128,6 +131,7 @@ describe('auth middleware', () => {
     await middleware(event)
 
     expect(mockAttachAuthContext).toHaveBeenCalled()
+    expect(mockHandleRefreshFlow).not.toHaveBeenCalled()
   })
 
   // ---------------------------------------------------------------------------
@@ -151,6 +155,56 @@ describe('auth middleware', () => {
     expect(mockHandleUnauthorized).toHaveBeenCalled()
   })
 
+  it('refreshes when access token is missing but refresh token is still valid', async () => {
+    mockGetRequestURL.mockReturnValue({ pathname: '/test' })
+
+    mockResolveAuthAction.mockReturnValue({
+      action: 'redirect',
+      isHtmlRequest: true,
+    })
+
+    mockResolveTokenState.mockResolvedValue({
+      hasAccess: false,
+      hasRefresh: true,
+      refreshCookie: 'refresh-token',
+    })
+
+    mockResolveRefreshTokenState.mockResolvedValue({
+      hasRefresh: true,
+    })
+
+    mockHandleRefreshFlow.mockResolvedValue(true)
+
+    await middleware(event)
+
+    expect(mockHandleRefreshFlow).toHaveBeenCalled()
+    expect(mockHandleUnauthorized).not.toHaveBeenCalled()
+  })
+
+  it('falls back to unauthorized when access token is missing and refresh token is invalid', async () => {
+    mockGetRequestURL.mockReturnValue({ pathname: '/test' })
+
+    mockResolveAuthAction.mockReturnValue({
+      action: 'redirect',
+      isHtmlRequest: true,
+    })
+
+    mockResolveTokenState.mockResolvedValue({
+      hasAccess: false,
+      hasRefresh: true,
+      refreshCookie: 'refresh-token',
+    })
+
+    mockResolveRefreshTokenState.mockResolvedValue({
+      hasRefresh: false,
+    })
+
+    await middleware(event)
+
+    expect(mockHandleRefreshFlow).not.toHaveBeenCalled()
+    expect(mockHandleUnauthorized).toHaveBeenCalled()
+  })
+
   // ---------------------------------------------------------------------------
   // EXPIRING TOKEN + REFRESH SUCCESS
   // ---------------------------------------------------------------------------
@@ -168,6 +222,10 @@ describe('auth middleware', () => {
       accessPayload: { exp: Math.floor(Date.now() / 1000) + 10 },
     })
 
+    mockResolveRefreshTokenState.mockResolvedValue({
+      hasRefresh: true,
+    })
+
     mockHandleRefreshFlow.mockResolvedValue(true)
 
     await middleware(event)
@@ -176,10 +234,61 @@ describe('auth middleware', () => {
     expect(mockHandleUnauthorized).not.toHaveBeenCalled()
   })
 
+  it('attempts refresh when access token is expiring and refresh cookie is present', async () => {
+    mockGetRequestURL.mockReturnValue({ pathname: '/test' })
+
+    mockResolveAuthAction.mockReturnValue({
+      action: 'redirect',
+      isHtmlRequest: true,
+    })
+
+    mockResolveTokenState.mockResolvedValue({
+      hasAccess: true,
+      hasRefresh: true,
+      refreshCookie: 'refresh-token',
+      accessPayload: { exp: Math.floor(Date.now() / 1000) + 10 },
+    })
+
+    mockResolveRefreshTokenState.mockResolvedValue({
+      hasRefresh: true,
+    })
+
+    mockHandleRefreshFlow.mockResolvedValue(true)
+
+    await middleware(event)
+
+    expect(mockHandleRefreshFlow).toHaveBeenCalled()
+  })
+
+  it('does not call refresh endpoint when refresh token is invalid or expired', async () => {
+    mockGetRequestURL.mockReturnValue({ pathname: '/test' })
+
+    mockResolveAuthAction.mockReturnValue({
+      action: 'redirect',
+      isHtmlRequest: true,
+    })
+
+    mockResolveTokenState.mockResolvedValue({
+      hasAccess: true,
+      hasRefresh: true,
+      refreshCookie: 'refresh-token',
+      accessPayload: { exp: Math.floor(Date.now() / 1000) + 10 },
+    })
+
+    mockResolveRefreshTokenState.mockResolvedValue({
+      hasRefresh: false,
+    })
+
+    await middleware(event)
+
+    expect(mockHandleRefreshFlow).not.toHaveBeenCalled()
+    expect(mockHandleUnauthorized).toHaveBeenCalled()
+  })
+
   // ---------------------------------------------------------------------------
   // EXPIRING TOKEN + REFRESH FAIL
   // ---------------------------------------------------------------------------
-  it('falls back to unauthorized if refresh fails', async () => {
+  it('falls back to unauthorized if refresh fails, including expired refresh tokens', async () => {
     mockGetRequestURL.mockReturnValue({ pathname: '/test' })
 
     mockResolveAuthAction.mockReturnValue({
@@ -191,6 +300,10 @@ describe('auth middleware', () => {
       hasAccess: true,
       hasRefresh: true,
       accessPayload: { exp: Math.floor(Date.now() / 1000) + 10 },
+    })
+
+    mockResolveRefreshTokenState.mockResolvedValue({
+      hasRefresh: true,
     })
 
     mockHandleRefreshFlow.mockResolvedValue(false)

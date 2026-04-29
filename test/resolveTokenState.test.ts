@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { resolveTokenState } from '../src/runtime/utils/resolveTokenState'
+import { resolveRefreshTokenState, resolveTokenState } from '../src/runtime/utils/resolveTokenState'
 
 // ---------------- HOISTED MOCKS ----------------
 const { mockGetCookie, mockValidateToken } = vi.hoisted(() => ({
@@ -33,69 +33,61 @@ describe('resolveTokenState', () => {
     expect(result.hasAccess).toBe(false)
     expect(result.hasRefresh).toBe(false)
     expect(result.accessPayload).toBeUndefined()
-    expect(result.refreshPayload).toBeUndefined()
     expect(mockValidateToken).not.toHaveBeenCalled()
   })
 
   // ---------------------------------------------------------------------------
-  // BOTH TOKENS VALID
+  // ACCESS TOKEN VALID
   // ---------------------------------------------------------------------------
-  it('returns valid access and refresh tokens with payloads', async () => {
+  it('validates the access token and reports refresh cookie presence', async () => {
     const accessPayload = { exp: 9999999999 }
-    const refreshPayload = { exp: 9999999999 }
 
     mockGetCookie.mockReturnValueOnce('access-token').mockReturnValueOnce('refresh-token')
 
-    mockValidateToken
-      .mockResolvedValueOnce({ valid: true, payload: accessPayload })
-      .mockResolvedValueOnce({ valid: true, payload: refreshPayload })
+    mockValidateToken.mockResolvedValueOnce({ valid: true, payload: accessPayload })
 
     const result = await resolveTokenState({} as any)
 
     expect(result.hasAccess).toBe(true)
     expect(result.hasRefresh).toBe(true)
     expect(result.accessPayload).toEqual(accessPayload)
-    expect(result.refreshPayload).toEqual(refreshPayload)
+    expect(mockValidateToken).toHaveBeenCalledTimes(1)
+    expect(mockValidateToken).toHaveBeenCalledWith('access-token')
   })
 
   // ---------------------------------------------------------------------------
-  // ACCESS INVALID, REFRESH VALID
+  // ACCESS INVALID, REFRESH PRESENT
   // ---------------------------------------------------------------------------
-  it('handles invalid access token and valid refresh token', async () => {
-    const refreshPayload = { exp: 9999999999 }
-
+  it('does not validate refresh token when access token is invalid', async () => {
     mockGetCookie.mockReturnValueOnce('access-token').mockReturnValueOnce('refresh-token')
 
-    mockValidateToken
-      .mockResolvedValueOnce({ valid: false })
-      .mockResolvedValueOnce({ valid: true, payload: refreshPayload })
+    mockValidateToken.mockResolvedValueOnce({ valid: false })
 
     const result = await resolveTokenState({} as any)
 
     expect(result.hasAccess).toBe(false)
     expect(result.hasRefresh).toBe(true)
     expect(result.accessPayload).toBeUndefined()
-    expect(result.refreshPayload).toEqual(refreshPayload)
+    expect(mockValidateToken).toHaveBeenCalledTimes(1)
+    expect(mockValidateToken).toHaveBeenCalledWith('access-token')
   })
 
   // ---------------------------------------------------------------------------
-  // ACCESS VALID, REFRESH INVALID
+  // ACCESS VALID, REFRESH PRESENT
   // ---------------------------------------------------------------------------
-  it('handles valid access token and invalid refresh token', async () => {
+  it('does not validate refresh token on the access token fast path', async () => {
     const accessPayload = { exp: 9999999999 }
 
     mockGetCookie.mockReturnValueOnce('access-token').mockReturnValueOnce('refresh-token')
 
-    mockValidateToken
-      .mockResolvedValueOnce({ valid: true, payload: accessPayload })
-      .mockResolvedValueOnce({ valid: false })
+    mockValidateToken.mockResolvedValueOnce({ valid: true, payload: accessPayload })
 
     const result = await resolveTokenState({} as any)
 
     expect(result.hasAccess).toBe(true)
-    expect(result.hasRefresh).toBe(false)
+    expect(result.hasRefresh).toBe(true)
     expect(result.accessPayload).toEqual(accessPayload)
-    expect(result.refreshPayload).toBeUndefined()
+    expect(mockValidateToken).toHaveBeenCalledTimes(1)
   })
 
   // ---------------------------------------------------------------------------
@@ -122,37 +114,67 @@ describe('resolveTokenState', () => {
   // ---------------------------------------------------------------------------
   // ONLY REFRESH COOKIE
   // ---------------------------------------------------------------------------
-  it('handles only refresh cookie present', async () => {
-    const refreshPayload = { exp: 9999999999 }
-
+  it('reports refresh cookie presence without validating it', async () => {
     mockGetCookie.mockReturnValueOnce(undefined).mockReturnValueOnce('refresh-token')
-
-    mockValidateToken.mockResolvedValueOnce({
-      valid: true,
-      payload: refreshPayload,
-    })
 
     const result = await resolveTokenState({} as any)
 
     expect(result.hasAccess).toBe(false)
     expect(result.hasRefresh).toBe(true)
-    expect(result.refreshPayload).toEqual(refreshPayload)
-    expect(mockValidateToken).toHaveBeenCalledTimes(1)
+    expect(result.accessPayload).toBeUndefined()
+    expect(mockValidateToken).not.toHaveBeenCalled()
   })
 
   // ---------------------------------------------------------------------------
   // PAYLOAD ONLY RETURNED WHEN VALID
   // ---------------------------------------------------------------------------
-  it('does not expose payload if token is invalid', async () => {
+  it('does not expose access payload if token is invalid', async () => {
     mockGetCookie.mockReturnValueOnce('access-token').mockReturnValueOnce('refresh-token')
 
-    mockValidateToken
-      .mockResolvedValueOnce({ valid: false, payload: { exp: 999 } })
-      .mockResolvedValueOnce({ valid: false, payload: { exp: 999 } })
+    mockValidateToken.mockResolvedValueOnce({ valid: false, payload: { exp: 999 } })
 
     const result = await resolveTokenState({} as any)
 
     expect(result.accessPayload).toBeUndefined()
+  })
+})
+
+describe('resolveRefreshTokenState', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('returns false when no refresh cookie exists', async () => {
+    mockGetCookie.mockReturnValue(undefined)
+
+    const result = await resolveRefreshTokenState({} as any)
+
+    expect(result.hasRefresh).toBe(false)
+    expect(result.refreshPayload).toBeUndefined()
+    expect(mockValidateToken).not.toHaveBeenCalled()
+  })
+
+  it('validates refresh token when refresh is needed', async () => {
+    const refreshPayload = { exp: 9999999999 }
+
+    mockGetCookie.mockReturnValue('refresh-token')
+    mockValidateToken.mockResolvedValueOnce({ valid: true, payload: refreshPayload })
+
+    const result = await resolveRefreshTokenState({} as any)
+
+    expect(result.hasRefresh).toBe(true)
+    expect(result.refreshCookie).toBe('refresh-token')
+    expect(result.refreshPayload).toEqual(refreshPayload)
+    expect(mockValidateToken).toHaveBeenCalledWith('refresh-token')
+  })
+
+  it('rejects invalid refresh token when refresh is needed', async () => {
+    mockGetCookie.mockReturnValue('refresh-token')
+    mockValidateToken.mockResolvedValueOnce({ valid: false })
+
+    const result = await resolveRefreshTokenState({} as any)
+
+    expect(result.hasRefresh).toBe(false)
     expect(result.refreshPayload).toBeUndefined()
   })
 })

@@ -3,7 +3,7 @@ import { useRuntimeConfig } from '#imports'
 import { getRequestURL, defineEventHandler, createError } from 'h3'
 import type { ResolvedModuleOptions } from '../../../types'
 import { resolveAuthAction } from '../../utils/resolveAuthAction'
-import { resolveTokenState } from '../../utils/resolveTokenState'
+import { resolveRefreshTokenState, resolveTokenState } from '../../utils/resolveTokenState'
 import { handleRefreshFlow } from '../../utils/handleRefreshFlow'
 import { handleUnauthorized } from '../../utils/handleUnauthorized'
 import { OIDC_BASE_PATH } from '../../constants/path'
@@ -49,8 +49,18 @@ export default defineEventHandler(async (event) => {
   // Resolve current token state (access + refresh)
   const { hasAccess, hasRefresh, accessPayload } = await resolveTokenState(event)
 
-  // No valid access token → force re-authentication
+  // No valid access token → attempt refresh if a refresh cookie is still present.
   if (!hasAccess || !accessPayload?.exp) {
+    if (hasRefresh) {
+      const refreshState = await resolveRefreshTokenState(event)
+
+      if (refreshState.hasRefresh) {
+        const success = await handleRefreshFlow(event, check.isHtmlRequest, config)
+
+        if (success) return
+      }
+    }
+
     return handleUnauthorized(event, check.isHtmlRequest)
   }
 
@@ -68,6 +78,12 @@ export default defineEventHandler(async (event) => {
 
   // Attempt token refresh if refresh token is available
   if (hasRefresh) {
+    const refreshState = await resolveRefreshTokenState(event)
+
+    if (!refreshState.hasRefresh) {
+      return handleUnauthorized(event, check.isHtmlRequest)
+    }
+
     const success = await handleRefreshFlow(event, check.isHtmlRequest, config)
 
     if (success) return
