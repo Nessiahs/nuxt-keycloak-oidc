@@ -233,14 +233,12 @@ npm run dev
 
 ## 🚢 Release
 
-Releases are published to npm from version tags.
+Releases are created by the release workflow after CI succeeds on `main`.
 
-```bash
-git tag v0.4.5
-git push origin v0.4.5
-```
+The workflow uses semantic-release to determine the next version, generate the changelog, and create the release tag. If a new version is created, the same workflow publishes the package to npm.
 
-The npm publish workflow runs linting, formatting checks, tests, and the package build before publishing. It uses the pushed tag as the npm package version and publishes via npm Trusted Publishing.
+The npm publish job runs linting, formatting checks, tests, and the package build before publishing. It uses the semantic-release version as the npm package version and publishes via npm Trusted Publishing.
+
 
 ---
 
