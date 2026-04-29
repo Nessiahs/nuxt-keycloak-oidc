@@ -1,3 +1,11 @@
+## 🚀 Version 0.5.1 (2026-04-29)
+
+### 🐛 Fixes
+* publish package from release workflow ([#46](https://github.com/Nessiahs/nuxt-keycloak-oidc/issues/46)) (0231d74148df578530c249e025b5a142f56d53cb)
+
+### 📚 Documentation
+* update changelog [skip ci] (ac8d4e0c18024595a7e05d734fcf24a9a004bbd1)
+
 ## 🚀 Version 0.5.0 (2026-04-29)
 
 ### 🚀 Features
