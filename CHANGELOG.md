@@ -1,3 +1,11 @@
+## 🚀 Version 0.5.2 (2026-04-29)
+
+### 🐛 Fixes
+* validate access token audience ([#49](https://github.com/Nessiahs/nuxt-keycloak-oidc/issues/49)) (ce3999d005a794618e314ffa4bb6f5223ad97365)
+
+### 📚 Documentation
+* update changelog [skip ci] (33414b1c0e21369d0266862f244fcbc3e1cfe0b1)
+
 ## 🚀 Version 0.5.1 (2026-04-29)
 
 ### 🐛 Fixes
