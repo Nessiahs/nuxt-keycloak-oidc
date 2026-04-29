@@ -1,3 +1,11 @@
+## 🚀 Version 0.6.0 (2026-04-29)
+
+### 🚀 Features
+* add sealed stateless token cookies ([#55](https://github.com/Nessiahs/nuxt-keycloak-oidc/issues/55)) (dc313d57e5e62d2a881bed794c5a8b24ba8947a1)
+
+### 📚 Documentation
+* update changelog [skip ci] (0dcd1b3ff4f85bf3d84200790040d02333e344ae)
+
 ## 🚀 Version 0.5.3 (2026-04-29)
 
 ### ⚡ Performance
