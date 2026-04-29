@@ -1,8 +1,7 @@
 import { type H3Event, getCookie, getRequestURL, setCookie } from 'h3'
 import { COOKIE_NAMES } from '../constants/cookies'
-import { useRuntimeConfig } from '#imports'
-import type { ResolvedModuleOptions } from '../../types'
 import { resolveCookieOptions } from './resolveCookieOptions'
+import { getKeycloakConfig } from './getKeycloakConfig'
 
 // Stores the current URL as a short-lived redirect target cookie.
 // This is used to return the user to their original page after authentication.
@@ -20,8 +19,7 @@ export function setRedirectCookie(event: H3Event) {
   if (url.pathname.startsWith('/api')) {
     return
   }
-  const runtimeConfig = useRuntimeConfig()
-  const config = runtimeConfig.keycloak as ResolvedModuleOptions
+  const config = getKeycloakConfig()
 
   // Combine pathname and query string (search)
   // → ensures query params (e.g. filters, tabs) are preserved

@@ -7,11 +7,11 @@
 [![Codacy Coverage](https://app.codacy.com/project/badge/Coverage/bad231b7991d4968a11f847fe50f88f5)](https://app.codacy.com/gh/Nessiahs/nuxt-keycloak-oidc/dashboard)
 [![Snyk Security](https://snyk.io/test/github/Nessiahs/nuxt-keycloak-oidc/badge.svg)](https://snyk.io/test/github/Nessiahs/nuxt-keycloak-oidc)
 
-Opinionated Keycloak integration for Nuxt with full SSR support.
+Opinionated Keycloak integration for Nuxt with full SSR support and cluster-ready token handling.
 
-Built for simplicity: configure once, and authentication just works across SSR and client navigation — including APIs and assets.
+Built for simplicity: configure once, and authentication just works across SSR and client navigation — including APIs, assets, and multi-instance Kubernetes deployments.
 
-> SSR-first Keycloak authentication for Nuxt. No custom middleware required.
+> SSR-first Keycloak authentication for Nuxt. No custom middleware, sticky sessions, or shared server-side session store required.
 
 ---
 
@@ -25,7 +25,8 @@ Built for simplicity: configure once, and authentication just works across SSR a
 - 🛣️ Route protection via Nuxt routeRules
 - 🔁 Flexible protection modes (`protect-all` / `protect-selected`)
 - 🖼️ Protects assets (e.g. images, files) via Nuxt routeRules
-- 🍪 Configurable authentication cookies
+- 🍪 Configurable authentication cookies with optional stateless sealing
+- 🧱 Cluster-ready token storage without sticky sessions or shared server storage
 - ⚙️ Fully configurable via Nuxt config (no runtime wiring required)
 - 🔌 Extendable auth context via Nuxt hooks
 
@@ -59,6 +60,7 @@ export default defineNuxtConfig({
     realm: 'your-realm',
     clientId: 'your-client-id',
     clientSecret: 'your-client-secret', // optional
+    cookieSecret: '', // optional, set NUXT_KEYCLOAK_COOKIE_SECRET in production
     baseUrl: 'https://your-app-domain.com', // optional, recommended for production
     mode: 'protect-all', // or 'protect-selected'
     cookie: {
@@ -83,6 +85,7 @@ No manual endpoint configuration is required.
 ### Optional options
 
 - `clientSecret`
+- `cookieSecret`
 - `baseUrl`
 - `mode` (defaults to `protect-all`)
 - `cookie`
@@ -102,6 +105,43 @@ export default defineNuxtConfig({
 ```
 
 When configured, `baseUrl` is used to build stable OIDC callback and logout redirect URLs. If it is omitted, the module falls back to the request-derived origin.
+
+### Stateless sealed token cookies
+
+By default, the module stores access and refresh tokens in HttpOnly cookies. This keeps deployments stateless and works well with multiple Nuxt instances in Kubernetes because every pod can handle every request without sticky sessions, Redis, Nitro storage, or a database-backed session store.
+
+For production, you can additionally seal token cookie contents with a shared secret:
+
+```ts
+export default defineNuxtConfig({
+  keycloak: {
+    cookieSecret: '',
+    cookie: {
+      secure: true,
+      sameSite: 'lax',
+      path: '/'
+    }
+  }
+})
+```
+
+Set `NUXT_KEYCLOAK_COOKIE_SECRET` in your deployment environment. All Nuxt instances must use the same value so they can open cookies created by each other.
+
+If `cookieSecret` is omitted, the module keeps the backwards-compatible raw HttpOnly cookie behavior. When an HTTPS `baseUrl` is configured, the module warns if token cookies are not sealed or if `cookie.secure` is not enabled.
+
+### Cluster-ready by default
+
+The authentication state does not live in a local server memory store. That means requests can be routed to any Nuxt instance without losing the session.
+
+This is useful for:
+
+- Kubernetes deployments with multiple replicas
+- rolling updates
+- autoscaling
+- load-balanced SSR/API requests
+- deployments without Redis or sticky sessions
+
+For production clusters, configure the same `NUXT_KEYCLOAK_COOKIE_SECRET` on every instance to enable sealed token cookies across all pods.
 
 ---
 

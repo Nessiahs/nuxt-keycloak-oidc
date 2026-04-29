@@ -3,6 +3,10 @@
 export default defineNuxtConfig({
   modules: ['../src/module'],
   devtools: { enabled: true },
+  routeRules: {
+    '/': { keycloak: false },
+    '/public': { keycloak: false },
+  },
   compatibilityDate: 'latest',
   keycloak: {
     enabled: true,
@@ -12,9 +16,8 @@ export default defineNuxtConfig({
     clientSecret: 'super-secret',
     mode: 'protect-all',
     cookie: {
-      "sameSite": "lax",
-      "path": "/"
-    }
-
+      sameSite: 'lax',
+      path: '/',
+    },
   },
 })

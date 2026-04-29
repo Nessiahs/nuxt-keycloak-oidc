@@ -1,24 +1,23 @@
-import { type H3Event, getCookie } from 'h3'
+import type { H3Event } from 'h3'
 import type { KeycloakTokenResponse } from '../../types/keycloak.types'
 import { getKeycloakDiscovery } from './keycloakDiscovery'
-import { useRuntimeConfig } from '#imports'
-import type { ResolvedModuleOptions } from '../../types'
 import { getHashKey } from './getHashKey'
 import { COOKIE_NAMES } from '../constants/cookies'
+import { getTokenCookie } from './tokenCookie'
+import { getKeycloakConfig } from './getKeycloakConfig'
 
 // In-memory lock map to deduplicate concurrent refresh requests.
 // Key = hashed refresh token, Value = in-flight refresh promise.
 const refreshLocks = new Map<string, Promise<KeycloakTokenResponse | false>>()
 
 export async function refreshToken(event: H3Event) {
-  const runtimeConfig = useRuntimeConfig()
-  const config = runtimeConfig.keycloak as ResolvedModuleOptions
+  const config = getKeycloakConfig()
 
   // Resolve OIDC endpoints (cached internally)
   const discovery = await getKeycloakDiscovery(config)
 
   // Read refresh token from cookie
-  const refresh = getCookie(event, COOKIE_NAMES.REFRESH)
+  const refresh = getTokenCookie(event, COOKIE_NAMES.REFRESH, config)
 
   // No refresh token → cannot refresh session
   if (!refresh) return false

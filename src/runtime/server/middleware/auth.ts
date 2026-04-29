@@ -1,12 +1,11 @@
 import { attachAuthContext } from '../../utils/attachAuthContext'
-import { useRuntimeConfig } from '#imports'
 import { getRequestURL, defineEventHandler, createError } from 'h3'
-import type { ResolvedModuleOptions } from '../../../types'
 import { resolveAuthAction } from '../../utils/resolveAuthAction'
 import { resolveRefreshTokenState, resolveTokenState } from '../../utils/resolveTokenState'
 import { handleRefreshFlow } from '../../utils/handleRefreshFlow'
 import { handleUnauthorized } from '../../utils/handleUnauthorized'
 import { OIDC_BASE_PATH } from '../../constants/path'
+import { getKeycloakConfig } from '../../utils/getKeycloakConfig'
 
 // Global authentication middleware for protecting routes.
 // Handles:
@@ -23,8 +22,7 @@ export default defineEventHandler(async (event) => {
     return
   }
 
-  const runtimeConfig = useRuntimeConfig()
-  const config = runtimeConfig.keycloak as ResolvedModuleOptions
+  const config = getKeycloakConfig()
 
   // Route rules (Nuxt routeRules integration)
   const rules = event.context._nitro?.routeRules || {}

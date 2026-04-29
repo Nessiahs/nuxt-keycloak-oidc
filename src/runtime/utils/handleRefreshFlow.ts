@@ -1,11 +1,11 @@
 import type { H3Event } from 'h3'
-import { createError, setCookie } from 'h3'
+import { createError } from 'h3'
 import { refreshToken } from './refreshToken'
 import { verifyAccessToken } from './verifyAccessToken'
 import { attachAuthContext } from './attachAuthContext'
 import { COOKIE_NAMES } from '../constants/cookies'
 import type { ResolvedModuleOptions } from '../../types'
-import { resolveCookieOptions } from './resolveCookieOptions'
+import { setTokenCookie } from './tokenCookie'
 
 // Handles token refresh flow:
 // - attempts refresh using refresh_token
@@ -50,21 +50,17 @@ export async function handleRefreshFlow(
   await attachAuthContext(event, payload)
 
   // Update access token cookie
-  setCookie(
-    event,
-    COOKIE_NAMES.ACCESS,
-    refreshed.access_token,
-    resolveCookieOptions(config, refreshed.expires_in),
-  )
+  setTokenCookie(event, COOKIE_NAMES.ACCESS, refreshed.access_token, config, refreshed.expires_in)
 
   // Update refresh token cookie only if provided
   // → avoids overwriting with undefined
   if (refreshed.refresh_token) {
-    setCookie(
+    setTokenCookie(
       event,
       COOKIE_NAMES.REFRESH,
       refreshed.refresh_token,
-      resolveCookieOptions(config, refreshed.refresh_expires_in),
+      config,
+      refreshed.refresh_expires_in,
     )
   }
 

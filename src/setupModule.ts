@@ -13,6 +13,7 @@ export default function setupModule(config: SetupOptions) {
     clientId: config.clientId,
     baseUrl: config.baseUrl,
     clientSecret: config.clientSecret ? '***' : '∅',
+    cookieSecret: config.cookieSecret ? '***' : '∅',
   }
 
   const missing: string[] = []
@@ -40,6 +41,7 @@ export default function setupModule(config: SetupOptions) {
       `  🏠 baseUrl: ${config.baseUrl ?? '∅'}\n` +
       `  🏰 realm: ${config.realm}\n` +
       `  🆔 clientId: ${config.clientId}\n` +
+      `  🔏 sealedCookies: ${config.cookieSecret ? 'enabled' : 'disabled'}\n` +
       `  🍪 cookie:\n` +
       `    • sameSite: ${config.cookie?.sameSite}\n` +
       `    • secure: ${config.cookie?.secure}\n` +
@@ -53,6 +55,18 @@ export default function setupModule(config: SetupOptions) {
   if (config.cookie.sameSite === 'none' && config.cookie.secure !== true) {
     console.warn(
       '[nuxt-keycloak] sameSite="none" requires secure=true (cookies may be dropped by browsers like Safari)',
+    )
+  }
+
+  if (config.baseUrl?.startsWith('https://') && config.cookie.secure !== true) {
+    console.warn(
+      '[nuxt-keycloak] HTTPS baseUrl configured but cookie.secure is not true. Production auth cookies should use secure=true.',
+    )
+  }
+
+  if (config.baseUrl?.startsWith('https://') && !config.cookieSecret) {
+    console.warn(
+      '[nuxt-keycloak] Token cookies are stored as raw HttpOnly cookies. Configure cookieSecret to seal token cookies in production.',
     )
   }
 

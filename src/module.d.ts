@@ -10,4 +10,24 @@ declare module '@nuxt/schema' {
   }
 }
 
+declare module 'nitropack/types' {
+  interface NitroRouteConfig {
+    keycloak?: boolean
+  }
+
+  interface NitroRouteRules {
+    keycloak?: boolean
+  }
+}
+
+declare module 'nitropack' {
+  interface NitroRouteConfig {
+    keycloak?: boolean
+  }
+
+  interface NitroRouteRules {
+    keycloak?: boolean
+  }
+}
+
 export {}

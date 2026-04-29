@@ -7,6 +7,26 @@ import { resolve } from 'node:path'
 
 const runtimeDir = fileURLToPath(new URL('./runtime', import.meta.url))
 
+declare module 'nitropack/types' {
+  interface NitroRouteConfig {
+    keycloak?: boolean
+  }
+
+  interface NitroRouteRules {
+    keycloak?: boolean
+  }
+}
+
+declare module 'nitropack' {
+  interface NitroRouteConfig {
+    keycloak?: boolean
+  }
+
+  interface NitroRouteRules {
+    keycloak?: boolean
+  }
+}
+
 export default defineNuxtModule<ModuleOptions>({
   meta: {
     name: 'nuxt-keycloak-oidc',
@@ -45,6 +65,7 @@ export default defineNuxtModule<ModuleOptions>({
       realm: '',
       clientId: '',
       clientSecret: '',
+      cookieSecret: '',
       baseUrl: '',
       mode: 'protect-all',
       ...existing,

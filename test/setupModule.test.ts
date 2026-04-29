@@ -72,6 +72,7 @@ describe('setupModule', () => {
     expect(log).toContain('url: http://localhost:8080')
     expect(log).toContain('realm: test')
     expect(log).toContain('clientId: client')
+    expect(log).toContain('sealedCookies')
     expect(log).toContain('cookie')
     expect(log).toContain('sameSite')
     expect(log).toContain('secure')
@@ -95,6 +96,30 @@ describe('setupModule', () => {
     expect(warnSpy).toHaveBeenCalledWith(
       expect.stringContaining('sameSite="none" requires secure=true'),
     )
+  })
+
+  it('warns when https baseUrl is used without secure cookies', () => {
+    setupModule(
+      validConfig({
+        baseUrl: 'https://app.example.com',
+        cookie: {
+          sameSite: 'lax',
+          path: '/',
+        },
+      }),
+    )
+
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('cookie.secure is not true'))
+  })
+
+  it('warns when https baseUrl is used without sealed token cookies', () => {
+    setupModule(
+      validConfig({
+        baseUrl: 'https://app.example.com',
+      }),
+    )
+
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('Configure cookieSecret'))
   })
 
   it('warns in protect-selected mode', () => {
@@ -163,6 +188,14 @@ describe('setupModule', () => {
     const calls = infoSpy.mock.calls.flat().join(' ')
 
     expect(calls).not.toContain('verysecretvalue')
+  })
+
+  it('does not log cookieSecret value directly (security)', () => {
+    setupModule(validConfig({ cookieSecret: 'verysecretcookievalue' }))
+
+    const calls = infoSpy.mock.calls.flat().join(' ')
+
+    expect(calls).not.toContain('verysecretcookievalue')
   })
 
   // Ensure module always produces some observable output for debugging

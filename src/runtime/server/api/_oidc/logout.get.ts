@@ -1,17 +1,15 @@
 import { getKeycloakDiscovery } from '../../../utils/keycloakDiscovery'
 import { type H3Event, deleteCookie, defineEventHandler, sendRedirect } from 'h3'
-import { useRuntimeConfig } from '#imports'
-import type { ResolvedModuleOptions } from '../../../../types'
 import { COOKIE_NAMES } from '../../../constants/cookies'
 import { resolveAppBaseUrl } from '../../../utils/resolveAppBaseUrl'
+import { getKeycloakConfig } from '../../../utils/getKeycloakConfig'
 
 // Handles logout flow:
 // - clears all local session cookies
 // - optionally redirects to Keycloak end_session endpoint
 // - falls back to local redirect if provider does not support logout
 export default defineEventHandler(async (event: H3Event) => {
-  const runtimeConfig = useRuntimeConfig()
-  const config = runtimeConfig.keycloak as ResolvedModuleOptions
+  const config = getKeycloakConfig()
 
   // Fetch OIDC discovery (to check logout support)
   const discovery = await getKeycloakDiscovery(config)

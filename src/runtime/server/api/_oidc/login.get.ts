@@ -1,20 +1,18 @@
 import type { H3Event } from 'h3'
 import { setCookie, sendRedirect, defineEventHandler } from 'h3'
-import { useRuntimeConfig } from '#imports'
 import crypto from 'node:crypto'
 import { getKeycloakDiscovery } from '../../../utils/keycloakDiscovery'
-import type { ResolvedModuleOptions } from '../../../../types'
 import { COOKIE_NAMES } from '../../../constants/cookies'
 import { resolveCookieOptions } from '../../../utils/resolveCookieOptions'
 import { OIDC_ROUTES } from '../../../constants/path'
 import { resolveAppBaseUrl } from '../../../utils/resolveAppBaseUrl'
+import { getKeycloakConfig } from '../../../utils/getKeycloakConfig'
 
 // Initiates the Keycloak OAuth2/OIDC login flow.
 // Generates PKCE values and state, stores them in secure cookies,
 // and redirects the user to the Keycloak authorization endpoint.
 export default defineEventHandler(async (event: H3Event) => {
-  const runtimeConfig = useRuntimeConfig()
-  const config = runtimeConfig.keycloak as ResolvedModuleOptions
+  const config = getKeycloakConfig()
 
   // Basic config validation (helps during setup / debugging)
   if (!config.clientId) {

@@ -1,11 +1,9 @@
 import { defineEventHandler, createError, getCookie } from 'h3'
-import { useRuntimeConfig } from '#imports'
-import type { ResolvedModuleOptions } from '../../../../types'
 import { COOKIE_NAMES } from '../../../constants/cookies'
+import { getKeycloakConfig } from '../../../utils/getKeycloakConfig'
 
 export default defineEventHandler(async (event) => {
-  const runtimeConfig = useRuntimeConfig()
-  const config = runtimeConfig.keycloak as ResolvedModuleOptions
+  const config = getKeycloakConfig()
 
   // ---------------------------------------------------------------------------
   // SECURITY GUARD
