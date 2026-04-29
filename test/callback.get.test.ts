@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { setKeycloakConfig } from './utils/setKeycloakConfig'
 import { OIDC_ROUTES } from '../src/runtime/constants/path'
+import { unsealTokenCookie } from '../src/runtime/utils/tokenCookie'
 
 // --- HOISTED MOCKS ---
 const { mockFetch } = vi.hoisted(() => ({
@@ -100,6 +101,37 @@ describe('auth callback handler', () => {
     expect(h3.setCookie).toHaveBeenCalledWith(event, 'kc_refresh', 'refresh', expect.any(Object))
 
     expect(h3.sendRedirect).toHaveBeenCalled()
+  })
+
+  it('seals token cookies when cookieSecret is configured', async () => {
+    setKeycloakConfig({
+      clientId: 'test-client',
+      clientSecret: 'secret',
+      cookieSecret: 'shared-secret',
+      cookie: {
+        sameSite: 'lax',
+        path: '/',
+      },
+    })
+
+    mockFetch.mockResolvedValue({
+      access_token: 'access',
+      refresh_token: 'refresh',
+      expires_in: 300,
+      refresh_expires_in: 3600,
+    })
+
+    const event = {} as any
+
+    await handler(event)
+
+    const accessCookie = h3.setCookie.mock.calls.find((call: any[]) => call[1] === 'kc_access')
+    const refreshCookie = h3.setCookie.mock.calls.find((call: any[]) => call[1] === 'kc_refresh')
+
+    expect(accessCookie[2]).not.toBe('access')
+    expect(refreshCookie[2]).not.toBe('refresh')
+    expect(unsealTokenCookie(accessCookie[2], 'shared-secret')).toBe('access')
+    expect(unsealTokenCookie(refreshCookie[2], 'shared-secret')).toBe('refresh')
   })
 
   it('uses the callback redirect_uri in the token exchange', async () => {

@@ -1,9 +1,8 @@
 import { createRemoteJWKSet, jwtVerify, errors } from 'jose'
-import { useRuntimeConfig } from '#imports'
 
 import { getKeycloakDiscovery } from './keycloakDiscovery'
 import type { KeycloakJwtToken } from '../../types/keycloak.types'
-import type { ResolvedModuleOptions } from '../../types'
+import { getKeycloakConfig } from './getKeycloakConfig'
 
 // Cached JWKS resolver (public keys) to avoid repeated network calls
 // This improves performance and reduces pressure on the identity provider
@@ -36,7 +35,7 @@ function resetJWKS() {
 // Lazily initializes JWKS and issuer using OIDC discovery
 // Ensures both values are fetched only once and reused across requests
 async function getJWKS() {
-  const config = useRuntimeConfig().keycloak as ResolvedModuleOptions
+  const config = getKeycloakConfig()
   const discovery = await getKeycloakDiscovery(config)
 
   // Create JWKS resolver once
@@ -56,8 +55,7 @@ async function getJWKS() {
 // Verifies the access token using JWKS and returns the decoded payload
 // Returns null if verification fails or token is not valid for this client
 export async function verifyAccessToken(token: string): Promise<KeycloakJwtToken | null> {
-  const runtime = useRuntimeConfig()
-  const config = runtime.keycloak as ResolvedModuleOptions
+  const config = getKeycloakConfig()
 
   try {
     const { jwks, issuer } = await getJWKS()

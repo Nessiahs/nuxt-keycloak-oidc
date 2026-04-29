@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { resolveRefreshTokenState, resolveTokenState } from '../src/runtime/utils/resolveTokenState'
+import { setKeycloakConfig } from './utils/setKeycloakConfig'
+import { sealTokenCookie } from '../src/runtime/utils/tokenCookie'
 
 // ---------------- HOISTED MOCKS ----------------
 const { mockGetCookie, mockValidateToken } = vi.hoisted(() => ({
@@ -20,6 +22,7 @@ vi.mock('../src/runtime/utils/validateToken', () => ({
 describe('resolveTokenState', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    setKeycloakConfig()
   })
 
   // ---------------------------------------------------------------------------
@@ -52,6 +55,23 @@ describe('resolveTokenState', () => {
     expect(result.hasRefresh).toBe(true)
     expect(result.accessPayload).toEqual(accessPayload)
     expect(mockValidateToken).toHaveBeenCalledTimes(1)
+    expect(mockValidateToken).toHaveBeenCalledWith('access-token')
+  })
+
+  it('unseals token cookies before validation when cookieSecret is configured', async () => {
+    setKeycloakConfig({ cookieSecret: 'shared-secret' })
+    const accessPayload = { exp: 9999999999 }
+
+    mockGetCookie
+      .mockReturnValueOnce(sealTokenCookie('access-token', 'shared-secret'))
+      .mockReturnValueOnce(sealTokenCookie('refresh-token', 'shared-secret'))
+
+    mockValidateToken.mockResolvedValueOnce({ valid: true, payload: accessPayload })
+
+    const result = await resolveTokenState({} as any)
+
+    expect(result.hasAccess).toBe(true)
+    expect(result.hasRefresh).toBe(true)
     expect(mockValidateToken).toHaveBeenCalledWith('access-token')
   })
 
@@ -142,6 +162,7 @@ describe('resolveTokenState', () => {
 describe('resolveRefreshTokenState', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    setKeycloakConfig()
   })
 
   it('returns false when no refresh cookie exists', async () => {
@@ -165,6 +186,20 @@ describe('resolveRefreshTokenState', () => {
     expect(result.hasRefresh).toBe(true)
     expect(result.refreshCookie).toBe('refresh-token')
     expect(result.refreshPayload).toEqual(refreshPayload)
+    expect(mockValidateToken).toHaveBeenCalledWith('refresh-token')
+  })
+
+  it('unseals refresh token before validating it', async () => {
+    setKeycloakConfig({ cookieSecret: 'shared-secret' })
+    const refreshPayload = { exp: 9999999999 }
+
+    mockGetCookie.mockReturnValue(sealTokenCookie('refresh-token', 'shared-secret'))
+    mockValidateToken.mockResolvedValueOnce({ valid: true, payload: refreshPayload })
+
+    const result = await resolveRefreshTokenState({} as any)
+
+    expect(result.hasRefresh).toBe(true)
+    expect(result.refreshCookie).toBe('refresh-token')
     expect(mockValidateToken).toHaveBeenCalledWith('refresh-token')
   })
 

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { setKeycloakConfig } from './utils/setKeycloakConfig'
+import { sealTokenCookie } from '../src/runtime/utils/tokenCookie'
 
 // ---------------- HOISTED MOCKS ----------------
 const { mockFetch, mockGetCookie, mockDiscovery } = vi.hoisted(() => ({
@@ -63,6 +64,31 @@ describe('refreshToken', () => {
     expect(result).toMatchObject({
       access_token: 'new-token',
     })
+  })
+
+  it('unseals refresh token cookies before sending them to Keycloak', async () => {
+    setKeycloakConfig({ cookieSecret: 'shared-secret' })
+    mockGetCookie.mockReturnValue(sealTokenCookie('refresh-token', 'shared-secret'))
+
+    mockFetch.mockResolvedValue({
+      access_token: 'new-token',
+    })
+
+    await refreshToken({} as any)
+
+    const call = mockFetch.mock.calls[0][1]
+
+    expect(call.body.get('refresh_token')).toBe('refresh-token')
+  })
+
+  it('does not call Keycloak when a sealed refresh cookie cannot be opened', async () => {
+    setKeycloakConfig({ cookieSecret: 'shared-secret' })
+    mockGetCookie.mockReturnValue(sealTokenCookie('refresh-token', 'other-secret'))
+
+    const result = await refreshToken({} as any)
+
+    expect(result).toBe(false)
+    expect(mockFetch).not.toHaveBeenCalled()
   })
 
   // ---------------------------------------------------------------------------

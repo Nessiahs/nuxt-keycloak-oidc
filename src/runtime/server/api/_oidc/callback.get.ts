@@ -11,18 +11,17 @@ import {
   defineEventHandler,
 } from 'h3'
 
-import { useRuntimeConfig } from '#imports'
-import type { ResolvedModuleOptions } from '../../../../types'
 import type { KeycloakTokenResponse } from '../../../../types/keycloak.types'
 import { COOKIE_NAMES } from '../../../constants/cookies'
 
 import { resolveCookieOptions } from '../../../utils/resolveCookieOptions'
 import { OIDC_ROUTES } from '../../../constants/path'
 import { resolveAppBaseUrl } from '../../../utils/resolveAppBaseUrl'
+import { setTokenCookie } from '../../../utils/tokenCookie'
+import { getKeycloakConfig } from '../../../utils/getKeycloakConfig'
 
 export default defineEventHandler(async (event: H3Event) => {
-  const runtimeConfig = useRuntimeConfig()
-  const config = runtimeConfig.keycloak as ResolvedModuleOptions
+  const config = getKeycloakConfig()
   const discovery = await getKeycloakDiscovery(config)
   const query = getQuery(event)
 
@@ -67,18 +66,14 @@ export default defineEventHandler(async (event: H3Event) => {
       body,
     })
 
-    setCookie(
-      event,
-      COOKIE_NAMES.ACCESS,
-      token.access_token,
-      resolveCookieOptions(config, token.expires_in),
-    )
+    setTokenCookie(event, COOKIE_NAMES.ACCESS, token.access_token, config, token.expires_in)
 
-    setCookie(
+    setTokenCookie(
       event,
       COOKIE_NAMES.REFRESH,
       token.refresh_token,
-      resolveCookieOptions(config, token.refresh_expires_in),
+      config,
+      token.refresh_expires_in,
     )
 
     deleteCookie(event, COOKIE_NAMES.STATE)

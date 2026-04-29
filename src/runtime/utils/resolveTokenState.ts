@@ -1,9 +1,10 @@
 import type { H3Event } from 'h3'
-import { getCookie } from 'h3'
 import type { TokenValidationResult } from './validateToken'
 import { validateToken } from './validateToken'
 import type { KeycloakJwtToken } from '../../types/keycloak.types'
 import { COOKIE_NAMES } from '../constants/cookies'
+import { getTokenCookie } from './tokenCookie'
+import { getKeycloakConfig } from './getKeycloakConfig'
 
 type TokenState = {
   hasAccess: boolean
@@ -27,9 +28,11 @@ const invalidResult: TokenValidationResult = {
 }
 
 export async function resolveTokenState(event: H3Event): Promise<TokenState> {
+  const config = getKeycloakConfig()
+
   // Read cookies from request
-  const accessCookie = getCookie(event, COOKIE_NAMES.ACCESS)
-  const refreshCookie = getCookie(event, COOKIE_NAMES.REFRESH)
+  const accessCookie = getTokenCookie(event, COOKIE_NAMES.ACCESS, config)
+  const refreshCookie = getTokenCookie(event, COOKIE_NAMES.REFRESH, config)
 
   // Validate only the access token on the request fast path.
   // Refresh tokens are validated by Keycloak only when a refresh is actually needed.
@@ -51,7 +54,8 @@ export async function resolveTokenState(event: H3Event): Promise<TokenState> {
 }
 
 export async function resolveRefreshTokenState(event: H3Event): Promise<RefreshTokenState> {
-  const refreshCookie = getCookie(event, COOKIE_NAMES.REFRESH)
+  const config = getKeycloakConfig()
+  const refreshCookie = getTokenCookie(event, COOKIE_NAMES.REFRESH, config)
   const refreshResult = refreshCookie ? await validateToken(refreshCookie) : invalidResult
 
   return {
