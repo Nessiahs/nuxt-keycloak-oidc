@@ -59,7 +59,6 @@ describe('auth login handler', () => {
       protocol: 'https:',
       host: 'example.com',
     })
-
     mockGetHeaders.mockReturnValue({})
   })
 
@@ -79,6 +78,26 @@ describe('auth login handler', () => {
     expect(redirectUrl).toContain('code_challenge_method=S256')
 
     expect(redirectUrl).toContain('redirect_uri=https%3A%2F%2Fexample.com%2Fapi%2F_oidc%2Fcallback')
+  })
+
+  it('uses configured baseUrl for redirect_uri', async () => {
+    setKeycloakConfig({
+      clientId: 'test-client',
+      baseUrl: 'https://app.example.test',
+      cookie: {
+        sameSite: 'lax',
+        path: '/',
+        secure: true,
+      },
+    })
+
+    await handler({} as any)
+
+    const redirectUrl = mockSendRedirect.mock.calls[0][1]
+
+    expect(redirectUrl).toContain(
+      'redirect_uri=https%3A%2F%2Fapp.example.test%2Fapi%2F_oidc%2Fcallback',
+    )
   })
 
   // ---------------------------------------------------------------------------

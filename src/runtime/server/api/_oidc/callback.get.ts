@@ -18,7 +18,7 @@ import { COOKIE_NAMES } from '../../../constants/cookies'
 
 import { resolveCookieOptions } from '../../../utils/resolveCookieOptions'
 import { OIDC_ROUTES } from '../../../constants/path'
-import { getOrigin } from '../../../utils/getOrigin'
+import { resolveAppBaseUrl } from '../../../utils/resolveAppBaseUrl'
 
 export default defineEventHandler(async (event: H3Event) => {
   const runtimeConfig = useRuntimeConfig()
@@ -44,7 +44,7 @@ export default defineEventHandler(async (event: H3Event) => {
 
   setCookie(event, COOKIE_NAMES.CODE_USED, code, resolveCookieOptions(config, 6000))
 
-  const redirectUri = getOrigin(event)
+  const redirectUri = new URL(OIDC_ROUTES.callback, resolveAppBaseUrl(event, config)).toString()
 
   const body = new URLSearchParams({
     grant_type: 'authorization_code',

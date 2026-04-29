@@ -75,7 +75,6 @@ describe('auth callback handler', () => {
       protocol: 'https:',
       host: 'example.com',
     })
-
     h3.getHeaders.mockReturnValue({})
   })
 
@@ -101,6 +100,46 @@ describe('auth callback handler', () => {
     expect(h3.setCookie).toHaveBeenCalledWith(event, 'kc_refresh', 'refresh', expect.any(Object))
 
     expect(h3.sendRedirect).toHaveBeenCalled()
+  })
+
+  it('uses the callback redirect_uri in the token exchange', async () => {
+    mockFetch.mockResolvedValue({
+      access_token: 'access',
+      refresh_token: 'refresh',
+      expires_in: 300,
+      refresh_expires_in: 3600,
+    })
+
+    await handler({} as any)
+
+    const body = mockFetch.mock.calls[0][1].body as URLSearchParams
+
+    expect(body.get('redirect_uri')).toBe('https://example.com/api/_oidc/callback')
+  })
+
+  it('uses configured baseUrl for the token exchange redirect_uri', async () => {
+    setKeycloakConfig({
+      clientId: 'test-client',
+      clientSecret: 'secret',
+      baseUrl: 'https://app.example.test',
+      cookie: {
+        sameSite: 'lax',
+        path: '/',
+      },
+    })
+
+    mockFetch.mockResolvedValue({
+      access_token: 'access',
+      refresh_token: 'refresh',
+      expires_in: 300,
+      refresh_expires_in: 3600,
+    })
+
+    await handler({} as any)
+
+    const body = mockFetch.mock.calls[0][1].body as URLSearchParams
+
+    expect(body.get('redirect_uri')).toBe('https://app.example.test/api/_oidc/callback')
   })
 
   // ---------------------------------------------------------------------------

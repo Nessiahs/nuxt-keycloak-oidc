@@ -13,7 +13,7 @@ vi.mock('h3', async () => {
     deleteCookie: vi.fn(),
     sendRedirect: vi.fn(),
     getRequestURL: vi.fn(),
-    getHeaders: vi.fn(), // 🔥 FIX
+    getHeaders: vi.fn(),
     defineEventHandler: (fn: any) => fn,
   }
 })
@@ -42,7 +42,6 @@ describe('auth logout handler', () => {
       protocol: 'https:',
       host: 'example.com',
     })
-
     h3.getHeaders.mockReturnValue({})
   })
 
@@ -77,6 +76,20 @@ describe('auth logout handler', () => {
     expect(h3.sendRedirect).toHaveBeenCalledWith(event, 'https://example.com')
   })
 
+  it('uses configured baseUrl for local logout redirect', async () => {
+    discoveryModule.getKeycloakDiscovery.mockResolvedValue({})
+    setKeycloakConfig({
+      clientId: 'test-client',
+      baseUrl: 'https://app.example.test',
+    })
+
+    const event = {} as any
+
+    await handler(event)
+
+    expect(h3.sendRedirect).toHaveBeenCalledWith(event, 'https://app.example.test')
+  })
+
   // ---------------------------------------------------------------------------
   // KEYCLOAK LOGOUT
   // ---------------------------------------------------------------------------
@@ -93,6 +106,24 @@ describe('auth logout handler', () => {
 
     expect(redirectUrl).toContain('https://keycloak.test/logout')
     expect(redirectUrl).toContain('client_id=test-client')
-    expect(redirectUrl).toContain('post_logout_redirect_uri=https%3A%2F%2Fexample.com') // 🔥 FIX: kein trailing slash encoded
+    expect(redirectUrl).toContain('post_logout_redirect_uri=https%3A%2F%2Fexample.com')
+  })
+
+  it('uses configured baseUrl for Keycloak post logout redirect', async () => {
+    discoveryModule.getKeycloakDiscovery.mockResolvedValue({
+      end_session_endpoint: 'https://keycloak.test/logout',
+    })
+    setKeycloakConfig({
+      clientId: 'test-client',
+      baseUrl: 'https://app.example.test',
+    })
+
+    const event = {} as any
+
+    await handler(event)
+
+    const redirectUrl = h3.sendRedirect.mock.calls[0][1]
+
+    expect(redirectUrl).toContain('post_logout_redirect_uri=https%3A%2F%2Fapp.example.test')
   })
 })

@@ -45,6 +45,7 @@ export default defineNuxtModule<ModuleOptions>({
       realm: '',
       clientId: '',
       clientSecret: '',
+      baseUrl: '',
       mode: 'protect-all',
       ...existing,
       cookie: {

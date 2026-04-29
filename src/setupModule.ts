@@ -11,6 +11,7 @@ export default function setupModule(config: SetupOptions) {
     url: config.url,
     realm: config.realm,
     clientId: config.clientId,
+    baseUrl: config.baseUrl,
     clientSecret: config.clientSecret ? '***' : '∅',
   }
 
@@ -36,6 +37,7 @@ export default function setupModule(config: SetupOptions) {
   console.info(
     '[nuxt-keycloak] Resolved configuration:\n' +
       `  🌐 url: ${config.url}\n` +
+      `  🏠 baseUrl: ${config.baseUrl ?? '∅'}\n` +
       `  🏰 realm: ${config.realm}\n` +
       `  🆔 clientId: ${config.clientId}\n` +
       `  🍪 cookie:\n` +

@@ -3,7 +3,7 @@ import { type H3Event, deleteCookie, defineEventHandler, sendRedirect } from 'h3
 import { useRuntimeConfig } from '#imports'
 import type { ResolvedModuleOptions } from '../../../../types'
 import { COOKIE_NAMES } from '../../../constants/cookies'
-import { getOrigin } from '../../../utils/getOrigin'
+import { resolveAppBaseUrl } from '../../../utils/resolveAppBaseUrl'
 
 // Handles logout flow:
 // - clears all local session cookies
@@ -25,7 +25,7 @@ export default defineEventHandler(async (event: H3Event) => {
   deleteCookie(event, COOKIE_NAMES.CODE_USED)
 
   // Build post-logout redirect URL (back to app root)
-  const redirect = getOrigin(event)
+  const redirect = resolveAppBaseUrl(event, config)
 
   // If provider does not support OIDC logout, fallback to local redirect
   if (!discovery.end_session_endpoint) {
