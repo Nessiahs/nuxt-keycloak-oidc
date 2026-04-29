@@ -1,3 +1,11 @@
+## 🚀 Version 0.5.0 (2026-04-29)
+
+### 🚀 Features
+* add trusted npm publishing workflow ([#44](https://github.com/Nessiahs/nuxt-keycloak-oidc/issues/44)) (1150d6d34e08708a48ce575f50f8d1662ab3f3cc)
+
+### 📚 Documentation
+* update changelog [skip ci] (54c8f02e75b8e19b4ce7175b4c6ec92d98f3c988)
+
 ## 🚀 Version 0.4.5 (2026-04-29)
 
 ### 🐛 Fixes
