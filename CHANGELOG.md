@@ -1,3 +1,11 @@
+## 🚀 Version 0.5.3 (2026-04-29)
+
+### ⚡ Performance
+* validate refresh token only when refresh is needed ([#52](https://github.com/Nessiahs/nuxt-keycloak-oidc/issues/52)) (2afa9aa83101eb5a0c5deb27b9c2f1b392f2b22c)
+
+### 📚 Documentation
+* update changelog [skip ci] (927bec666129c32c7ad8c6d1b762ca58746dcb7f)
+
 ## 🚀 Version 0.5.2 (2026-04-29)
 
 ### 🐛 Fixes
