@@ -3,7 +3,7 @@ import { useRuntimeConfig } from '#imports'
 
 import { getKeycloakDiscovery } from './keycloakDiscovery'
 import type { KeycloakJwtToken } from '../../types/keycloak.types'
-import type { ModuleOptions } from '../../types'
+import type { ResolvedModuleOptions } from '../../types'
 
 // Cached JWKS resolver (public keys) to avoid repeated network calls
 // This improves performance and reduces pressure on the identity provider
@@ -36,7 +36,7 @@ function resetJWKS() {
 // Lazily initializes JWKS and issuer using OIDC discovery
 // Ensures both values are fetched only once and reused across requests
 async function getJWKS() {
-  const config = useRuntimeConfig().keycloak as ModuleOptions
+  const config = useRuntimeConfig().keycloak as ResolvedModuleOptions
   const discovery = await getKeycloakDiscovery(config)
 
   // Create JWKS resolver once
@@ -57,7 +57,7 @@ async function getJWKS() {
 // Returns null if verification fails or token is not valid for this client
 export async function verifyAccessToken(token: string): Promise<KeycloakJwtToken | null> {
   const runtime = useRuntimeConfig()
-  const config = runtime.keycloak as ModuleOptions
+  const config = runtime.keycloak as ResolvedModuleOptions
 
   try {
     const { jwks, issuer } = await getJWKS()
@@ -69,6 +69,8 @@ export async function verifyAccessToken(token: string): Promise<KeycloakJwtToken
     // - validates issuer
     const { payload } = await jwtVerify(token, jwks, {
       issuer,
+      audience: config.clientId,
+      clockTolerance: 5,
     })
 
     // Ensure token is intended for this client (Keycloak-specific claim)
