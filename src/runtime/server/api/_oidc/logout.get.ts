@@ -3,6 +3,7 @@ import { type H3Event, deleteCookie, defineEventHandler, sendRedirect } from 'h3
 import { COOKIE_NAMES } from '../../../constants/cookies'
 import { resolveAppBaseUrl } from '../../../utils/resolveAppBaseUrl'
 import { getKeycloakConfig } from '../../../utils/getKeycloakConfig'
+import { resolveCookieOptions } from '../../../utils/resolveCookieOptions'
 
 // Handles logout flow:
 // - clears all local session cookies
@@ -13,14 +14,15 @@ export default defineEventHandler(async (event: H3Event) => {
 
   // Fetch OIDC discovery (to check logout support)
   const discovery = await getKeycloakDiscovery(config)
+  const cookieOptions = resolveCookieOptions(config)
 
   // Clear all locally stored authentication/session cookies
-  deleteCookie(event, COOKIE_NAMES.ACCESS)
-  deleteCookie(event, COOKIE_NAMES.REFRESH)
-  deleteCookie(event, COOKIE_NAMES.REDIRECT_TO)
-  deleteCookie(event, COOKIE_NAMES.STATE)
-  deleteCookie(event, COOKIE_NAMES.VERIFIER)
-  deleteCookie(event, COOKIE_NAMES.CODE_USED)
+  deleteCookie(event, COOKIE_NAMES.ACCESS, cookieOptions)
+  deleteCookie(event, COOKIE_NAMES.REFRESH, cookieOptions)
+  deleteCookie(event, COOKIE_NAMES.REDIRECT_TO, cookieOptions)
+  deleteCookie(event, COOKIE_NAMES.STATE, cookieOptions)
+  deleteCookie(event, COOKIE_NAMES.VERIFIER, cookieOptions)
+  deleteCookie(event, COOKIE_NAMES.CODE_USED, cookieOptions)
 
   // Build post-logout redirect URL (back to app root)
   const redirect = resolveAppBaseUrl(event, config)
