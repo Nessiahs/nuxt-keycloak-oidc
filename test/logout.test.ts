@@ -30,6 +30,10 @@ describe('auth logout handler', () => {
 
     setKeycloakConfig({
       clientId: 'test-client',
+      cookie: {
+        sameSite: 'lax',
+        path: '/',
+      },
     })
 
     h3 = await import('h3')
@@ -55,12 +59,61 @@ describe('auth logout handler', () => {
 
     await handler(event)
 
-    expect(h3.deleteCookie).toHaveBeenCalledWith(event, 'kc_access')
-    expect(h3.deleteCookie).toHaveBeenCalledWith(event, 'kc_refresh')
-    expect(h3.deleteCookie).toHaveBeenCalledWith(event, 'redirect_to')
-    expect(h3.deleteCookie).toHaveBeenCalledWith(event, 'kc_state')
-    expect(h3.deleteCookie).toHaveBeenCalledWith(event, 'kc_verifier')
-    expect(h3.deleteCookie).toHaveBeenCalledWith(event, 'kc_code_used')
+    expect(h3.deleteCookie).toHaveBeenCalledWith(
+      event,
+      'kc_access',
+      expect.objectContaining({ path: '/' }),
+    )
+    expect(h3.deleteCookie).toHaveBeenCalledWith(
+      event,
+      'kc_refresh',
+      expect.objectContaining({ path: '/' }),
+    )
+    expect(h3.deleteCookie).toHaveBeenCalledWith(
+      event,
+      'redirect_to',
+      expect.objectContaining({ path: '/' }),
+    )
+    expect(h3.deleteCookie).toHaveBeenCalledWith(
+      event,
+      'kc_state',
+      expect.objectContaining({ path: '/' }),
+    )
+    expect(h3.deleteCookie).toHaveBeenCalledWith(
+      event,
+      'kc_verifier',
+      expect.objectContaining({ path: '/' }),
+    )
+    expect(h3.deleteCookie).toHaveBeenCalledWith(
+      event,
+      'kc_code_used',
+      expect.objectContaining({ path: '/' }),
+    )
+  })
+
+  it('clears cookies with configured path and domain', async () => {
+    discoveryModule.getKeycloakDiscovery.mockResolvedValue({})
+    setKeycloakConfig({
+      clientId: 'test-client',
+      cookie: {
+        sameSite: 'lax',
+        path: '/app',
+        domain: '.example.com',
+      },
+    })
+
+    const event = {} as any
+
+    await handler(event)
+
+    expect(h3.deleteCookie).toHaveBeenCalledWith(
+      event,
+      'kc_access',
+      expect.objectContaining({
+        path: '/app',
+        domain: '.example.com',
+      }),
+    )
   })
 
   // ---------------------------------------------------------------------------
@@ -81,6 +134,10 @@ describe('auth logout handler', () => {
     setKeycloakConfig({
       clientId: 'test-client',
       baseUrl: 'https://app.example.test',
+      cookie: {
+        sameSite: 'lax',
+        path: '/',
+      },
     })
 
     const event = {} as any
@@ -116,6 +173,10 @@ describe('auth logout handler', () => {
     setKeycloakConfig({
       clientId: 'test-client',
       baseUrl: 'https://app.example.test',
+      cookie: {
+        sameSite: 'lax',
+        path: '/',
+      },
     })
 
     const event = {} as any
