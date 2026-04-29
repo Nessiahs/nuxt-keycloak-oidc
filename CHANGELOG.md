@@ -1,3 +1,11 @@
+## 🚀 Version 0.6.1 (2026-04-29)
+
+### 🐛 Fixes
+* warn for weak cookieSecret configuration ([#59](https://github.com/Nessiahs/nuxt-keycloak-oidc/issues/59)) (9efe4386fc4d129655b8e023c5478012433734a5)
+
+### 📚 Documentation
+* update changelog [skip ci] (f3a27111026dcb7af65c2b5dc0fad67f561ee95a)
+
 ## 🚀 Version 0.6.0 (2026-04-29)
 
 ### 🚀 Features
