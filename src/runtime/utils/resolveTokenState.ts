@@ -11,6 +11,11 @@ type TokenState = {
   accessCookie?: string
   refreshCookie?: string
   accessPayload?: KeycloakJwtToken
+}
+
+type RefreshTokenState = {
+  hasRefresh: boolean
+  refreshCookie?: string
   refreshPayload?: KeycloakJwtToken
 }
 
@@ -26,17 +31,14 @@ export async function resolveTokenState(event: H3Event): Promise<TokenState> {
   const accessCookie = getCookie(event, COOKIE_NAMES.ACCESS)
   const refreshCookie = getCookie(event, COOKIE_NAMES.REFRESH)
 
-  // Validate tokens in parallel for better performance
-  // If no cookie is present, use a static invalid result
-  const [accessResult, refreshResult] = await Promise.all([
-    accessCookie ? validateToken(accessCookie) : invalidResult,
-    refreshCookie ? validateToken(refreshCookie) : invalidResult,
-  ])
+  // Validate only the access token on the request fast path.
+  // Refresh tokens are validated by Keycloak only when a refresh is actually needed.
+  const accessResult = accessCookie ? await validateToken(accessCookie) : invalidResult
 
   return {
     // Boolean flags for quick checks in middleware
     hasAccess: accessResult.valid,
-    hasRefresh: refreshResult.valid,
+    hasRefresh: Boolean(refreshCookie),
 
     // Expose raw cookies (used later for refresh / context)
     accessCookie,
@@ -45,6 +47,16 @@ export async function resolveTokenState(event: H3Event): Promise<TokenState> {
     // Only expose payload if token is valid
     // → prevents usage of stale or invalid token data
     accessPayload: accessResult.valid ? accessResult.payload : undefined,
+  }
+}
+
+export async function resolveRefreshTokenState(event: H3Event): Promise<RefreshTokenState> {
+  const refreshCookie = getCookie(event, COOKIE_NAMES.REFRESH)
+  const refreshResult = refreshCookie ? await validateToken(refreshCookie) : invalidResult
+
+  return {
+    hasRefresh: refreshResult.valid,
+    refreshCookie,
     refreshPayload: refreshResult.valid ? refreshResult.payload : undefined,
   }
 }
