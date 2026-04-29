@@ -1,6 +1,8 @@
 import type { ResolvedModuleOptions } from './types'
 
 type SetupOptions = Omit<ResolvedModuleOptions, 'enabled'>
+const MIN_COOKIE_SECRET_LENGTH = 32
+
 // Validates and reports the final resolved configuration.
 // This function is intentionally side-effectful (console output + throws)
 // to provide clear feedback during module initialization.
@@ -67,6 +69,12 @@ export default function setupModule(config: SetupOptions) {
   if (config.baseUrl?.startsWith('https://') && !config.cookieSecret) {
     console.warn(
       '[nuxt-keycloak] Token cookies are stored as raw HttpOnly cookies. Configure cookieSecret to seal token cookies in production.',
+    )
+  }
+
+  if (config.cookieSecret && config.cookieSecret.length < MIN_COOKIE_SECRET_LENGTH) {
+    console.warn(
+      `[nuxt-keycloak] cookieSecret should be at least ${MIN_COOKIE_SECRET_LENGTH} characters long for production use.`,
     )
   }
 
