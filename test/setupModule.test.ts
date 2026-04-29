@@ -122,6 +122,30 @@ describe('setupModule', () => {
     expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('Configure cookieSecret'))
   })
 
+  it('warns when configured cookieSecret is shorter than 32 characters', () => {
+    setupModule(validConfig({ cookieSecret: 'short-cookie-secret' }))
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining('cookieSecret should be at least 32 characters'),
+    )
+  })
+
+  it('does not warn about cookieSecret length when cookieSecret is empty', () => {
+    setupModule(validConfig({ cookieSecret: '' }))
+
+    expect(warnSpy).not.toHaveBeenCalledWith(
+      expect.stringContaining('cookieSecret should be at least 32 characters'),
+    )
+  })
+
+  it('does not warn about cookieSecret length when cookieSecret is at least 32 characters', () => {
+    setupModule(validConfig({ cookieSecret: 'a'.repeat(32) }))
+
+    expect(warnSpy).not.toHaveBeenCalledWith(
+      expect.stringContaining('cookieSecret should be at least 32 characters'),
+    )
+  })
+
   it('warns in protect-selected mode', () => {
     setupModule(validConfig({ mode: 'protect-selected' }))
 
@@ -196,6 +220,14 @@ describe('setupModule', () => {
     const calls = infoSpy.mock.calls.flat().join(' ')
 
     expect(calls).not.toContain('verysecretcookievalue')
+  })
+
+  it('does not log weak cookieSecret value directly (security)', () => {
+    setupModule(validConfig({ cookieSecret: 'short-cookie-secret' }))
+
+    const calls = warnSpy.mock.calls.flat().join(' ')
+
+    expect(calls).not.toContain('short-cookie-secret')
   })
 
   // Ensure module always produces some observable output for debugging
