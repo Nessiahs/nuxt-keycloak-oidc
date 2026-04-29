@@ -26,6 +26,7 @@ export interface KeycloakJwtToken extends JWTPayload {
   sid?: string
 
   acr?: string
+  nonce?: string
   scope?: string
 
   'allowed-origins'?: string[]

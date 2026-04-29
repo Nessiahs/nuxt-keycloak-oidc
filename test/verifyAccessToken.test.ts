@@ -85,6 +85,18 @@ describe('verifyAccessToken', () => {
     await expect(verifyAccessToken('token')).resolves.toBeNull()
   })
 
+  it('rejects tokens without the Keycloak azp claim', async () => {
+    mockJwtVerify.mockResolvedValue({
+      payload: {
+        aud: 'client',
+      },
+    })
+
+    const { verifyAccessToken } = await import('../src/runtime/utils/verifyAccessToken')
+
+    await expect(verifyAccessToken('token')).resolves.toBeNull()
+  })
+
   it('validates audience on the key rotation retry path', async () => {
     mockJwtVerify
       .mockRejectedValueOnce(new JWKSNoMatchingKey('no matching key'))

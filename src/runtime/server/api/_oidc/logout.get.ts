@@ -21,6 +21,7 @@ export default defineEventHandler(async (event: H3Event) => {
   deleteCookie(event, COOKIE_NAMES.REFRESH, cookieOptions)
   deleteCookie(event, COOKIE_NAMES.REDIRECT_TO, cookieOptions)
   deleteCookie(event, COOKIE_NAMES.STATE, cookieOptions)
+  deleteCookie(event, COOKIE_NAMES.NONCE, cookieOptions)
   deleteCookie(event, COOKIE_NAMES.VERIFIER, cookieOptions)
   deleteCookie(event, COOKIE_NAMES.CODE_USED, cookieOptions)
 

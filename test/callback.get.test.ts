@@ -4,8 +4,9 @@ import { OIDC_ROUTES } from '../src/runtime/constants/path'
 import { unsealTokenCookie } from '../src/runtime/utils/tokenCookie'
 
 // --- HOISTED MOCKS ---
-const { mockFetch } = vi.hoisted(() => ({
+const { mockFetch, mockVerifyIdToken } = vi.hoisted(() => ({
   mockFetch: vi.fn(),
+  mockVerifyIdToken: vi.fn(),
 }))
 
 vi.stubGlobal('$fetch', mockFetch)
@@ -13,6 +14,10 @@ vi.stubGlobal('$fetch', mockFetch)
 // --- MODULE MOCKS ---
 vi.mock('../src/runtime/utils/keycloakDiscovery', () => ({
   getKeycloakDiscovery: vi.fn(),
+}))
+
+vi.mock('../src/runtime/utils/verifyIdToken', () => ({
+  verifyIdToken: mockVerifyIdToken,
 }))
 
 vi.mock('h3', async () => {
@@ -58,6 +63,7 @@ describe('auth callback handler', () => {
     discoveryModule.getKeycloakDiscovery.mockResolvedValue({
       token_endpoint: 'https://keycloak.test/token',
     })
+    mockVerifyIdToken.mockResolvedValue({ sub: 'user', nonce: 'nonce123' })
 
     h3.getQuery.mockReturnValue({
       code: 'abc',
@@ -67,6 +73,7 @@ describe('auth callback handler', () => {
     h3.getCookie.mockImplementation((_: unknown, name: string) => {
       const cookies: Record<string, string> = {
         kc_state: 'state123',
+        kc_nonce: 'nonce123',
         kc_verifier: 'verifier123',
       }
       return cookies[name]
@@ -86,6 +93,7 @@ describe('auth callback handler', () => {
     mockFetch.mockResolvedValue({
       access_token: 'access',
       refresh_token: 'refresh',
+      id_token: 'id',
       expires_in: 300,
       refresh_expires_in: 3600,
     })
@@ -100,6 +108,8 @@ describe('auth callback handler', () => {
 
     expect(h3.setCookie).toHaveBeenCalledWith(event, 'kc_refresh', 'refresh', expect.any(Object))
 
+    expect(mockVerifyIdToken).toHaveBeenCalledWith('id', 'nonce123')
+    expect(h3.deleteCookie).toHaveBeenCalledWith(event, 'kc_nonce')
     expect(h3.sendRedirect).toHaveBeenCalled()
   })
 
@@ -117,6 +127,7 @@ describe('auth callback handler', () => {
     mockFetch.mockResolvedValue({
       access_token: 'access',
       refresh_token: 'refresh',
+      id_token: 'id',
       expires_in: 300,
       refresh_expires_in: 3600,
     })
@@ -138,6 +149,7 @@ describe('auth callback handler', () => {
     mockFetch.mockResolvedValue({
       access_token: 'access',
       refresh_token: 'refresh',
+      id_token: 'id',
       expires_in: 300,
       refresh_expires_in: 3600,
     })
@@ -163,6 +175,7 @@ describe('auth callback handler', () => {
     mockFetch.mockResolvedValue({
       access_token: 'access',
       refresh_token: 'refresh',
+      id_token: 'id',
       expires_in: 300,
       refresh_expires_in: 3600,
     })
@@ -177,6 +190,32 @@ describe('auth callback handler', () => {
   // ---------------------------------------------------------------------------
   // INVALID STATE
   // ---------------------------------------------------------------------------
+  it('rejects missing authorization code', async () => {
+    h3.getQuery.mockReturnValue({
+      state: 'state123',
+    })
+
+    const event = {} as any
+
+    await handler(event)
+
+    expect(h3.sendRedirect).toHaveBeenCalledWith(event, OIDC_ROUTES.login)
+    expect(mockFetch).not.toHaveBeenCalled()
+  })
+
+  it('rejects missing state query parameter', async () => {
+    h3.getQuery.mockReturnValue({
+      code: 'abc',
+    })
+
+    const event = {} as any
+
+    await handler(event)
+
+    expect(h3.sendRedirect).toHaveBeenCalledWith(event, OIDC_ROUTES.login)
+    expect(mockFetch).not.toHaveBeenCalled()
+  })
+
   it('rejects invalid state', async () => {
     h3.getCookie.mockImplementation((_: unknown, name: string) => {
       if (name === 'kc_state') return 'wrong'
@@ -196,6 +235,7 @@ describe('auth callback handler', () => {
   it('rejects missing verifier', async () => {
     h3.getCookie.mockImplementation((_: unknown, name: string) => {
       if (name === 'kc_state') return 'state123'
+      if (name === 'kc_nonce') return 'nonce123'
       return undefined
     })
 
@@ -206,12 +246,28 @@ describe('auth callback handler', () => {
     expect(h3.sendRedirect).toHaveBeenCalledWith(event, OIDC_ROUTES.login)
   })
 
+  it('rejects missing nonce', async () => {
+    h3.getCookie.mockImplementation((_: unknown, name: string) => {
+      if (name === 'kc_state') return 'state123'
+      if (name === 'kc_verifier') return 'verifier123'
+      return undefined
+    })
+
+    const event = {} as any
+
+    await handler(event)
+
+    expect(h3.sendRedirect).toHaveBeenCalledWith(event, OIDC_ROUTES.login)
+    expect(mockFetch).not.toHaveBeenCalled()
+  })
+
   // ---------------------------------------------------------------------------
   // REPLAY PROTECTION
   // ---------------------------------------------------------------------------
   it('prevents replay of used code', async () => {
     h3.getCookie.mockImplementation((_: unknown, name: string) => {
       if (name === 'kc_state') return 'state123'
+      if (name === 'kc_nonce') return 'nonce123'
       if (name === 'kc_verifier') return 'verifier123'
       if (name === 'kc_code_used') return 'abc'
     })
@@ -237,10 +293,7 @@ describe('auth callback handler', () => {
     expect(h3.sendRedirect).toHaveBeenCalledWith(event, OIDC_ROUTES.login)
   })
 
-  // ---------------------------------------------------------------------------
-  // OPEN REDIRECT PROTECTION
-  // ---------------------------------------------------------------------------
-  it('prevents open redirect', async () => {
+  it('rejects missing id_token', async () => {
     mockFetch.mockResolvedValue({
       access_token: 'a',
       refresh_token: 'r',
@@ -248,9 +301,48 @@ describe('auth callback handler', () => {
       refresh_expires_in: 3600,
     })
 
+    const event = {} as any
+
+    await handler(event)
+
+    expect(h3.sendRedirect).toHaveBeenCalledWith(event, OIDC_ROUTES.login)
+    expect(mockVerifyIdToken).not.toHaveBeenCalled()
+  })
+
+  it('rejects invalid id_token or nonce mismatch', async () => {
+    mockFetch.mockResolvedValue({
+      access_token: 'a',
+      refresh_token: 'r',
+      id_token: 'id',
+      expires_in: 300,
+      refresh_expires_in: 3600,
+    })
+    mockVerifyIdToken.mockResolvedValue(null)
+
+    const event = {} as any
+
+    await handler(event)
+
+    expect(mockVerifyIdToken).toHaveBeenCalledWith('id', 'nonce123')
+    expect(h3.sendRedirect).toHaveBeenCalledWith(event, OIDC_ROUTES.login)
+  })
+
+  // ---------------------------------------------------------------------------
+  // OPEN REDIRECT PROTECTION
+  // ---------------------------------------------------------------------------
+  it('prevents open redirect', async () => {
+    mockFetch.mockResolvedValue({
+      access_token: 'a',
+      refresh_token: 'r',
+      id_token: 'id',
+      expires_in: 300,
+      refresh_expires_in: 3600,
+    })
+
     h3.getCookie.mockImplementation((_: unknown, name: string) => {
       const cookies: Record<string, string> = {
         kc_state: 'state123',
+        kc_nonce: 'nonce123',
         kc_verifier: 'verifier123',
         redirect_to: 'https://evil.com',
       }
@@ -271,6 +363,7 @@ describe('auth callback handler', () => {
     mockFetch.mockResolvedValue({
       access_token: 'a',
       refresh_token: 'r',
+      id_token: 'id',
       expires_in: 300,
       refresh_expires_in: 3600,
     })
@@ -278,6 +371,7 @@ describe('auth callback handler', () => {
     h3.getCookie.mockImplementation((_: unknown, name: string) => {
       const cookies: Record<string, string> = {
         kc_state: 'state123',
+        kc_nonce: 'nonce123',
         kc_verifier: 'verifier123',
         redirect_to: '/dashboard',
       }
