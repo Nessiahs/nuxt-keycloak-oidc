@@ -3,7 +3,7 @@ import type { ModuleOptions, ResolvedModuleOptions } from './types'
 import setupModule from './setupModule'
 import { OIDC_ROUTES } from './runtime/constants/path'
 import { fileURLToPath } from 'node:url'
-import { resolve } from 'pathe'
+import { resolve } from 'node:path'
 
 const runtimeDir = fileURLToPath(new URL('./runtime', import.meta.url))
 
