@@ -1,3 +1,11 @@
+## 🚀 Version 0.4.5 (2026-04-29)
+
+### 🐛 Fixes
+* add optional baseUrl for OIDC redirect URI handling ([#41](https://github.com/Nessiahs/nuxt-keycloak-oidc/issues/41)) (bb5b1d373df52a8a907da87036f6c6aef5fe764e)
+
+### 📚 Documentation
+* update changelog [skip ci] (56af187b8ecfe76214662fb3e225e9207352b882)
+
 ## 🚀 Version 0.4.4 (2026-04-12)
 
 ### 🐛 Fixes
