@@ -231,6 +231,19 @@ npm run dev
 
 ---
 
+## 🚢 Release
+
+Releases are published to npm from version tags.
+
+```bash
+git tag v0.4.5
+git push origin v0.4.5
+```
+
+The npm publish workflow runs linting, formatting checks, tests, and the package build before publishing. It uses the pushed tag as the npm package version and publishes via npm Trusted Publishing.
+
+---
+
 ## 📄 License
 
 MIT
