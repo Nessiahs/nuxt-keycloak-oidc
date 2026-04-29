@@ -59,6 +59,7 @@ export default defineNuxtConfig({
     realm: 'your-realm',
     clientId: 'your-client-id',
     clientSecret: 'your-client-secret', // optional
+    baseUrl: 'https://your-app-domain.com', // optional, recommended for production
     mode: 'protect-all', // or 'protect-selected'
     cookie: {
       sameSite: 'lax',
@@ -82,8 +83,25 @@ No manual endpoint configuration is required.
 ### Optional options
 
 - `clientSecret`
+- `baseUrl`
 - `mode` (defaults to `protect-all`)
 - `cookie`
+
+### Production base URL
+
+By default, the module derives the application origin from the current request. This keeps local development and simple deployments configuration-free.
+
+For production deployments behind proxies, CDNs, ingress controllers, or load balancers, configure `baseUrl` explicitly:
+
+```ts
+export default defineNuxtConfig({
+  keycloak: {
+    baseUrl: 'https://your-app-domain.com'
+  }
+})
+```
+
+When configured, `baseUrl` is used to build stable OIDC callback and logout redirect URLs. If it is omitted, the module falls back to the request-derived origin.
 
 ---
 

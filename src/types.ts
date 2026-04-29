@@ -4,6 +4,7 @@ export interface ModuleOptions {
   realm?: string
   clientId?: string
   clientSecret?: string
+  baseUrl?: string
   mode?: 'protect-all' | 'protect-selected'
   cookie?: {
     sameSite?: 'lax' | 'none' | 'strict'
@@ -19,6 +20,7 @@ export interface ResolvedModuleOptions {
   realm: string
   clientId: string
   clientSecret?: string
+  baseUrl?: string
   mode: 'protect-all' | 'protect-selected'
   cookie: {
     sameSite: 'lax' | 'none' | 'strict'

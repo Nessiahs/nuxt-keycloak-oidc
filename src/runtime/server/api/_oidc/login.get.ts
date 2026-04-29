@@ -1,5 +1,5 @@
 import type { H3Event } from 'h3'
-import { getRequestURL, setCookie, sendRedirect, defineEventHandler } from 'h3'
+import { setCookie, sendRedirect, defineEventHandler } from 'h3'
 import { useRuntimeConfig } from '#imports'
 import crypto from 'node:crypto'
 import { getKeycloakDiscovery } from '../../../utils/keycloakDiscovery'
@@ -7,6 +7,7 @@ import type { ResolvedModuleOptions } from '../../../../types'
 import { COOKIE_NAMES } from '../../../constants/cookies'
 import { resolveCookieOptions } from '../../../utils/resolveCookieOptions'
 import { OIDC_ROUTES } from '../../../constants/path'
+import { resolveAppBaseUrl } from '../../../utils/resolveAppBaseUrl'
 
 // Initiates the Keycloak OAuth2/OIDC login flow.
 // Generates PKCE values and state, stores them in secure cookies,
@@ -23,8 +24,6 @@ export default defineEventHandler(async (event: H3Event) => {
   // Fetch OIDC discovery document (contains authorization endpoint)
   const discovery = await getKeycloakDiscovery(config)
 
-  const url = getRequestURL(event)
-
   // Generate CSRF protection state (random, short-lived)
   const state = crypto.randomBytes(32).toString('hex')
 
@@ -37,10 +36,8 @@ export default defineEventHandler(async (event: H3Event) => {
 
   // Store PKCE verifier (used later during token exchange)
   setCookie(event, COOKIE_NAMES.VERIFIER, verifier, resolveCookieOptions(config, 300))
-  // NOTE: Uses request host to construct redirect URI.
-  // In production environments, consider configuring a fixed base URL
-  // to avoid relying on potentially untrusted host headers.
-  const baseUrl = `${url.protocol}//${url.host}`
+  // Prefer explicit baseUrl for production, fallback to request-derived origin.
+  const baseUrl = resolveAppBaseUrl(event, config)
   const redirect = new URL(OIDC_ROUTES.callback, baseUrl).toString()
 
   // Build authorization request parameters
