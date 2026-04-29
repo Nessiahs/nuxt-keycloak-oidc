@@ -1,3 +1,11 @@
+## 🚀 Version 0.6.2 (2026-04-29)
+
+### 🐛 Fixes
+* delete logout cookies with configured options ([#61](https://github.com/Nessiahs/nuxt-keycloak-oidc/issues/61)) (f3a7c53288d98ddbe62b0129052c8ed4fac7fc4a)
+
+### 📚 Documentation
+* update changelog [skip ci] (211c567dd96df2b5284f0d85c52b1668b587bee5)
+
 ## 🚀 Version 0.6.1 (2026-04-29)
 
 ### 🐛 Fixes
