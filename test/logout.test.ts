@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { setKeycloakConfig } from './utils/setKeycloakConfig'
+
 // --- mocks ---
 vi.mock('../src/runtime/utils/keycloakDiscovery', () => ({
   getKeycloakDiscovery: vi.fn(),
@@ -26,9 +27,11 @@ describe('auth logout handler', () => {
     vi.clearAllMocks()
 
     discoveryModule = await import('../src/runtime/utils/keycloakDiscovery')
+
     setKeycloakConfig({
       clientId: 'test-client',
     })
+
     h3 = await import('h3')
 
     const handlerModule = await import('../src/runtime/server/api/_oidc/logout.get')
@@ -70,7 +73,7 @@ describe('auth logout handler', () => {
 
     await handler(event)
 
-    expect(h3.sendRedirect).toHaveBeenCalledWith(event, 'https://example.com/')
+    expect(h3.sendRedirect).toHaveBeenCalledWith(event, 'https://example.com')
   })
 
   it('uses configured baseUrl for local logout redirect', async () => {
@@ -84,7 +87,7 @@ describe('auth logout handler', () => {
 
     await handler(event)
 
-    expect(h3.sendRedirect).toHaveBeenCalledWith(event, 'https://app.example.test/')
+    expect(h3.sendRedirect).toHaveBeenCalledWith(event, 'https://app.example.test')
   })
 
   // ---------------------------------------------------------------------------
@@ -103,7 +106,7 @@ describe('auth logout handler', () => {
 
     expect(redirectUrl).toContain('https://keycloak.test/logout')
     expect(redirectUrl).toContain('client_id=test-client')
-    expect(redirectUrl).toContain('post_logout_redirect_uri=https%3A%2F%2Fexample.com%2F')
+    expect(redirectUrl).toContain('post_logout_redirect_uri=https%3A%2F%2Fexample.com')
   })
 
   it('uses configured baseUrl for Keycloak post logout redirect', async () => {
@@ -121,6 +124,6 @@ describe('auth logout handler', () => {
 
     const redirectUrl = h3.sendRedirect.mock.calls[0][1]
 
-    expect(redirectUrl).toContain('post_logout_redirect_uri=https%3A%2F%2Fapp.example.test%2F')
+    expect(redirectUrl).toContain('post_logout_redirect_uri=https%3A%2F%2Fapp.example.test')
   })
 })

@@ -36,6 +36,7 @@ export default defineEventHandler(async (event: H3Event) => {
 
   // Store PKCE verifier (used later during token exchange)
   setCookie(event, COOKIE_NAMES.VERIFIER, verifier, resolveCookieOptions(config, 300))
+
   // Prefer explicit baseUrl for production, fallback to request-derived origin.
   const baseUrl = resolveAppBaseUrl(event, config)
   const redirect = new URL(OIDC_ROUTES.callback, baseUrl).toString()

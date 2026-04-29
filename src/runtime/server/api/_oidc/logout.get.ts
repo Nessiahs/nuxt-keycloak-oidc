@@ -25,7 +25,7 @@ export default defineEventHandler(async (event: H3Event) => {
   deleteCookie(event, COOKIE_NAMES.CODE_USED)
 
   // Build post-logout redirect URL (back to app root)
-  const redirect = new URL('/', resolveAppBaseUrl(event, config)).toString()
+  const redirect = resolveAppBaseUrl(event, config)
 
   // If provider does not support OIDC logout, fallback to local redirect
   if (!discovery.end_session_endpoint) {

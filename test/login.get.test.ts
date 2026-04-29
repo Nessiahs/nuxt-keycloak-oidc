@@ -76,6 +76,7 @@ describe('auth login handler', () => {
     expect(redirectUrl).toContain('client_id=test-client')
     expect(redirectUrl).toContain('response_type=code')
     expect(redirectUrl).toContain('code_challenge_method=S256')
+
     expect(redirectUrl).toContain('redirect_uri=https%3A%2F%2Fexample.com%2Fapi%2F_oidc%2Fcallback')
   })
 
@@ -115,7 +116,6 @@ describe('auth login handler', () => {
     expect(calls[0][2]).toBeTruthy()
     expect(calls[1][2]).toBeTruthy()
 
-    // check cookie options (indirect resolveCookieOptions test)
     expect(calls[0][3]).toMatchObject({
       httpOnly: true,
       sameSite: 'lax',
@@ -135,6 +135,12 @@ describe('auth login handler', () => {
     const firstState = mockSetCookie.mock.calls[0][2]
 
     vi.clearAllMocks()
+
+    mockGetHeaders.mockReturnValue({})
+    mockGetRequestURL.mockReturnValue({
+      protocol: 'https:',
+      host: 'example.com',
+    })
 
     await handler(event)
     const secondState = mockSetCookie.mock.calls[0][2]
