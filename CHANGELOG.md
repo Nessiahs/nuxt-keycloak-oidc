@@ -1,3 +1,11 @@
+## 🚀 Version 0.6.3 (2026-04-30)
+
+### 🐛 Fixes
+* validate nonce and id token during login ([#71](https://github.com/Nessiahs/nuxt-keycloak-oidc/issues/71)) (f28e3aefb4a130cfa31d9beed0693f2edfc0be92)
+
+### 📚 Documentation
+* update changelog [skip ci] (57a5c0fe221c9c8e7afe1cb8e7aa61f91899efb7)
+
 ## 🚀 Version 0.6.2 (2026-04-29)
 
 ### 🐛 Fixes
