@@ -256,17 +256,20 @@ describe('setupModule', () => {
 describe('route registration', () => {
   let addServerHandlerMock: any
   let addPluginMock: any
+  let addImportsDirMock: any
   beforeEach(async () => {
     vi.resetModules()
     vi.clearAllMocks()
 
     addServerHandlerMock = vi.fn()
     addPluginMock = vi.fn()
+    addImportsDirMock = vi.fn()
     vi.doMock('@nuxt/kit', async (importOriginal) => {
       const actual = await importOriginal<any>()
 
       return {
         ...actual,
+        addImportsDir: addImportsDirMock,
         addPlugin: addPluginMock,
         addServerHandler: addServerHandlerMock,
         createResolver: () => ({
@@ -299,6 +302,27 @@ describe('route registration', () => {
     expect(addPluginMock).toHaveBeenCalledWith(expect.stringContaining('./runtime/plugin'))
   })
 
+  it('registers runtime composables for auto-import', async () => {
+    const module = await import('../src/module')
+
+    await module.default(
+      {
+        enabled: true,
+        url: 'http://localhost',
+        realm: 'test',
+        clientId: 'client',
+        mode: 'protect-all',
+      },
+      {
+        options: {
+          runtimeConfig: {},
+        },
+      } as any,
+    )
+
+    expect(addImportsDirMock).toHaveBeenCalledWith(expect.stringContaining('./runtime/composables'))
+  })
+
   it('registers all auth routes and middleware', async () => {
     const module = await import('../src/module')
 
@@ -324,6 +348,7 @@ describe('route registration', () => {
         [expect.objectContaining({ route: OIDC_ROUTES.login })],
         [expect.objectContaining({ route: OIDC_ROUTES.callback })],
         [expect.objectContaining({ route: OIDC_ROUTES.logout })],
+        [expect.objectContaining({ route: OIDC_ROUTES.session })],
         [expect.objectContaining({ route: OIDC_ROUTES.debug })],
         [expect.objectContaining({ middleware: true })],
       ]),

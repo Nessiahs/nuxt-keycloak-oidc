@@ -5,4 +5,5 @@ export const OIDC_ROUTES = {
   callback: `${OIDC_BASE_PATH}/callback`,
   logout: `${OIDC_BASE_PATH}/logout`,
   debug: `${OIDC_BASE_PATH}/debug`,
+  session: `${OIDC_BASE_PATH}/session`,
 }
