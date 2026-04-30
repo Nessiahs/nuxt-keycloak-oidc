@@ -28,6 +28,7 @@ Built for simplicity: configure once, and authentication just works across SSR a
 - 🍪 Configurable authentication cookies with optional stateless sealing
 - 🧱 Cluster-ready token storage without sticky sessions or shared server storage
 - ⚙️ Fully configurable via Nuxt config (no runtime wiring required)
+- 👤 `useKeycloakAuth` composable for safe session state, login, logout, and refresh
 - 🔌 Extendable auth context via Nuxt hooks
 
 ---
@@ -218,6 +219,49 @@ export default defineNuxtPlugin((nuxtApp) => {
 
 The default auth context is minimal and can be extended via the hook.
 The hook is executed on each authenticated request.
+
+---
+
+## 👤 Client session state
+
+Use `useKeycloakAuth` in pages, layouts, components, stores, or composables when the client UI needs to know the current session state.
+
+```vue
+<script setup lang="ts">
+const { status, user, login, logout, refresh } = useKeycloakAuth()
+</script>
+
+<template>
+  <button v-if="status === 'unauthenticated'" @click="login">
+    Login
+  </button>
+
+  <div v-else-if="status === 'authenticated'">
+    <span>{{ user?.preferred_username ?? user?.email }}</span>
+    <button @click="logout">Logout</button>
+  </div>
+</template>
+```
+
+The composable is backed by:
+
+```text
+GET /api/_oidc/session
+```
+
+The session endpoint validates the current HttpOnly token cookies on the server and refreshes the session when possible. It returns only safe user fields and never returns access or refresh tokens to client-side JavaScript.
+
+Returned user fields:
+
+- `sub`
+- `email`
+- `email_verified`
+- `name`
+- `preferred_username`
+- `given_name`
+- `family_name`
+
+Application-specific roles, groups, permissions, or custom claims should be normalized server-side through the `keycloak:auth:context` hook and exposed through an application-owned endpoint when needed.
 
 ---
 

@@ -50,3 +50,23 @@ export interface KeycloakJwtToken extends JWTPayload {
   given_name?: string
   family_name?: string
 }
+
+export type KeycloakSessionUser = {
+  sub?: string
+  email?: string
+  email_verified?: boolean
+  name?: string
+  preferred_username?: string
+  given_name?: string
+  family_name?: string
+}
+
+export type KeycloakSessionResponse =
+  | {
+      authenticated: true
+      user: KeycloakSessionUser
+    }
+  | {
+      authenticated: false
+      user: null
+    }
