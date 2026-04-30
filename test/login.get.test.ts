@@ -76,6 +76,7 @@ describe('auth login handler', () => {
     expect(redirectUrl).toContain('client_id=test-client')
     expect(redirectUrl).toContain('response_type=code')
     expect(redirectUrl).toContain('code_challenge_method=S256')
+    expect(redirectUrl).toContain('nonce=')
 
     expect(redirectUrl).toContain('redirect_uri=https%3A%2F%2Fexample.com%2Fapi%2F_oidc%2Fcallback')
   })
@@ -103,18 +104,20 @@ describe('auth login handler', () => {
   // ---------------------------------------------------------------------------
   // COOKIES
   // ---------------------------------------------------------------------------
-  it('sets state and verifier cookies', async () => {
+  it('sets state, nonce and verifier cookies', async () => {
     await handler({} as any)
 
-    expect(mockSetCookie).toHaveBeenCalledTimes(2)
+    expect(mockSetCookie).toHaveBeenCalledTimes(3)
 
     const calls = mockSetCookie.mock.calls
 
     expect(calls[0][1]).toBe(COOKIE_NAMES.STATE)
-    expect(calls[1][1]).toBe(COOKIE_NAMES.VERIFIER)
+    expect(calls[1][1]).toBe(COOKIE_NAMES.NONCE)
+    expect(calls[2][1]).toBe(COOKIE_NAMES.VERIFIER)
 
     expect(calls[0][2]).toBeTruthy()
     expect(calls[1][2]).toBeTruthy()
+    expect(calls[2][2]).toBeTruthy()
 
     expect(calls[0][3]).toMatchObject({
       httpOnly: true,

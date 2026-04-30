@@ -19,6 +19,7 @@ import { OIDC_ROUTES } from '../../../constants/path'
 import { resolveAppBaseUrl } from '../../../utils/resolveAppBaseUrl'
 import { setTokenCookie } from '../../../utils/tokenCookie'
 import { getKeycloakConfig } from '../../../utils/getKeycloakConfig'
+import { verifyIdToken } from '../../../utils/verifyIdToken'
 
 export default defineEventHandler(async (event: H3Event) => {
   const config = getKeycloakConfig()
@@ -29,9 +30,10 @@ export default defineEventHandler(async (event: H3Event) => {
   const state = query.state as string
 
   const storedState = getCookie(event, COOKIE_NAMES.STATE)
+  const storedNonce = getCookie(event, COOKIE_NAMES.NONCE)
   const verifier = getCookie(event, COOKIE_NAMES.VERIFIER)
 
-  if (!code || !state || !storedState || state !== storedState || !verifier) {
+  if (!code || !state || !storedState || state !== storedState || !storedNonce || !verifier) {
     return sendRedirect(event, OIDC_ROUTES.login)
   }
 
@@ -66,6 +68,14 @@ export default defineEventHandler(async (event: H3Event) => {
       body,
     })
 
+    if (!token.id_token) {
+      return sendRedirect(event, OIDC_ROUTES.login)
+    }
+
+    if (!(await verifyIdToken(token.id_token, storedNonce))) {
+      return sendRedirect(event, OIDC_ROUTES.login)
+    }
+
     setTokenCookie(event, COOKIE_NAMES.ACCESS, token.access_token, config, token.expires_in)
 
     setTokenCookie(
@@ -77,6 +87,7 @@ export default defineEventHandler(async (event: H3Event) => {
     )
 
     deleteCookie(event, COOKIE_NAMES.STATE)
+    deleteCookie(event, COOKIE_NAMES.NONCE)
     deleteCookie(event, COOKIE_NAMES.VERIFIER)
 
     const userRedirectUri = getCookie(event, COOKIE_NAMES.REDIRECT_TO) ?? ''

@@ -25,12 +25,18 @@ export default defineEventHandler(async (event: H3Event) => {
   // Generate CSRF protection state (random, short-lived)
   const state = crypto.randomBytes(32).toString('hex')
 
+  // Generate OIDC nonce to bind the ID token to this browser login attempt
+  const nonce = crypto.randomBytes(32).toString('hex')
+
   // Generate PKCE verifier & challenge (RFC 7636)
   const verifier = crypto.randomBytes(32).toString('base64url')
   const challenge = crypto.createHash('sha256').update(verifier).digest('base64url')
 
   // Store state in secure, httpOnly cookie (prevents CSRF attacks)
   setCookie(event, COOKIE_NAMES.STATE, state, resolveCookieOptions(config, 300))
+
+  // Store nonce for ID token validation during callback
+  setCookie(event, COOKIE_NAMES.NONCE, nonce, resolveCookieOptions(config, 300))
 
   // Store PKCE verifier (used later during token exchange)
   setCookie(event, COOKIE_NAMES.VERIFIER, verifier, resolveCookieOptions(config, 300))
@@ -47,6 +53,7 @@ export default defineEventHandler(async (event: H3Event) => {
     redirect_uri: redirect,
     scope: 'openid profile email',
     state,
+    nonce,
     code_challenge: challenge,
     code_challenge_method: 'S256',
   })

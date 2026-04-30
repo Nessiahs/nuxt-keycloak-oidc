@@ -81,6 +81,11 @@ describe('auth logout handler', () => {
     )
     expect(h3.deleteCookie).toHaveBeenCalledWith(
       event,
+      'kc_nonce',
+      expect.objectContaining({ path: '/' }),
+    )
+    expect(h3.deleteCookie).toHaveBeenCalledWith(
+      event,
       'kc_verifier',
       expect.objectContaining({ path: '/' }),
     )

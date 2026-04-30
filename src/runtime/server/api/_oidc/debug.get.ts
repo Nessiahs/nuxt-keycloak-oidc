@@ -49,6 +49,7 @@ export default defineEventHandler(async (event) => {
     accessToken: !!getCookie(event, COOKIE_NAMES.ACCESS),
     refreshToken: !!getCookie(event, COOKIE_NAMES.REFRESH),
     state: !!getCookie(event, COOKIE_NAMES.STATE),
+    nonce: !!getCookie(event, COOKIE_NAMES.NONCE),
     verifier: !!getCookie(event, COOKIE_NAMES.VERIFIER),
   }
 
@@ -57,6 +58,7 @@ export default defineEventHandler(async (event) => {
   // ---------------------------------------------------------------------------
   const security = {
     pkce: true,
+    nonce: true,
   }
 
   const cookie = {
