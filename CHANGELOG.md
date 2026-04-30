@@ -1,3 +1,11 @@
+## 🚀 Version 0.7.0 (2026-04-30)
+
+### 🚀 Features
+* add keycloak auth session composable ([#73](https://github.com/Nessiahs/nuxt-keycloak-oidc/issues/73)) (fa4eb9f0f260d81ac07aca3b6fbece8d27e5364c)
+
+### 📚 Documentation
+* update changelog [skip ci] (b8f6a428db102a37e4841126ea6200d26ef6c623)
+
 ## 🚀 Version 0.6.3 (2026-04-30)
 
 ### 🐛 Fixes
