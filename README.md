@@ -30,6 +30,7 @@ Built for simplicity: configure once, and authentication just works across SSR a
 - 🧱 Cluster-ready token storage without sticky sessions or shared server storage
 - ⚙️ Fully configurable via Nuxt config (no runtime wiring required)
 - 👤 `useKeycloakAuth` composable for safe session state, login, logout, and refresh
+- 🔁 `useKeycloakFetch` wrapper for client-side `401` login redirects
 - 🔌 Extendable auth context via Nuxt hooks
 
 ---
@@ -273,6 +274,32 @@ Returned user fields:
 - `family_name`
 
 Application-specific roles, groups, permissions, or custom claims should be normalized server-side through the `keycloak:auth:context` hook and exposed through an application-owned endpoint when needed.
+
+---
+
+## 🔁 Keycloak-aware fetch
+
+Protected API routes return `401 Unauthorized` when the current browser session is not authenticated.
+
+For client-side API calls, the module provides a thin `useFetch` wrapper that redirects the browser to the existing login endpoint when a `401` response is received.
+
+```vue
+<script setup lang="ts">
+const { data, pending, error, refresh } = await useKeycloakFetch('/api/profile')
+</script>
+```
+
+This keeps the normal Nuxt `useFetch` return shape and reactive behavior. Reactive requests, query params, watched sources, refresh handling, and caller-provided options continue to work like regular `useFetch`.
+
+Only client-side `401` responses from internal same-origin requests trigger the login redirect. Relative app URLs such as `/api/profile` and absolute URLs on the current application origin are treated as internal.
+
+External API calls are not intercepted. If `https://external-api.example.com` returns `401`, the response keeps its normal `useFetch` error behavior and your own error handling remains responsible for it.
+
+For internal client-side `401` responses, the module handles the login redirect before caller-provided `onResponseError` handlers run. This keeps authentication failures under the module's control. Caller-provided error handlers still run for non-`401` errors and for external API responses.
+
+Non-`401` errors keep their normal error behavior, and server-side requests do not perform browser redirects.
+
+The browser still does not receive access or refresh tokens. API authentication continues to use the module's HttpOnly cookies.
 
 ---
 
