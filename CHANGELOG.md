@@ -1,3 +1,11 @@
+## 🚀 Version 0.9.0 (2026-05-04)
+
+### 🚀 Features
+* add keycloak fetch composable ([#77](https://github.com/Nessiahs/nuxt-keycloak-oidc/issues/77)) (592bd91d656affe3cc3c2b427d241a0d0be94fc5)
+
+### 📚 Documentation
+* update changelog [skip ci] (ac746d151da75cca69addb380789fd7fbcd55f39)
+
 ## 🚀 Version 0.8.0 (2026-05-04)
 
 ### 🚀 Features
