@@ -1,3 +1,11 @@
+## 🚀 Version 0.8.0 (2026-05-04)
+
+### 🚀 Features
+* add client-side route protection ([#75](https://github.com/Nessiahs/nuxt-keycloak-oidc/issues/75)) (f3af00752ea24a8c0fa25317a316888f5705ba09)
+
+### 📚 Documentation
+* update changelog [skip ci] (2170d9bc7d3a36e89a77b674b0faecef5f41ebb2)
+
 ## 🚀 Version 0.7.0 (2026-04-30)
 
 ### 🚀 Features
