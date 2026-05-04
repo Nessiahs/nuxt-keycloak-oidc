@@ -13,10 +13,12 @@ import {
 
 import type { KeycloakTokenResponse } from '../../../../types/keycloak.types'
 import { COOKIE_NAMES } from '../../../constants/cookies'
+import { HEADER_NAMES, HEADER_VALUES } from '../../../constants/headers'
 
 import { resolveCookieOptions } from '../../../utils/resolveCookieOptions'
 import { OIDC_ROUTES } from '../../../constants/path'
 import { resolveAppBaseUrl } from '../../../utils/resolveAppBaseUrl'
+import { isSafeRedirectTarget } from '../../../utils/setRedirectCookie'
 import { setTokenCookie } from '../../../utils/tokenCookie'
 import { getKeycloakConfig } from '../../../utils/getKeycloakConfig'
 import { verifyIdToken } from '../../../utils/verifyIdToken'
@@ -63,7 +65,7 @@ export default defineEventHandler(async (event: H3Event) => {
     const token = await $fetch<KeycloakTokenResponse>(discovery.token_endpoint, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        [HEADER_NAMES.CONTENT_TYPE]: HEADER_VALUES.FORM_URLENCODED,
       },
       body,
     })
@@ -94,7 +96,7 @@ export default defineEventHandler(async (event: H3Event) => {
 
     deleteCookie(event, COOKIE_NAMES.REDIRECT_TO)
 
-    if (!userRedirectUri.startsWith('/')) {
+    if (!isSafeRedirectTarget(userRedirectUri)) {
       return sendRedirect(event, '/')
     }
 

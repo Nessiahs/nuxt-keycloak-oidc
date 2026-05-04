@@ -108,12 +108,22 @@ export default defineNuxtModule<ModuleOptions>({
       },
     }
     const resolvedConfig = runtime.keycloak as ResolvedModuleOptions
+    runtime.public = runtime.public || {}
+    runtime.public.keycloak = {
+      ...((runtime.public.keycloak || {}) as Record<string, unknown>),
+      mode: resolvedConfig.mode,
+    }
+
     // Validate and log configuration (security checks, warnings, etc.)
     setupModule(resolvedConfig)
 
     // Register runtime plugin
     const resolver = createResolver(import.meta.url)
     addPlugin(resolver.resolve('./runtime/plugin'))
+    addPlugin({
+      src: resolver.resolve('./runtime/client-route-protection.client'),
+      mode: 'client',
+    })
     addImportsDir(resolver.resolve('./runtime/composables'))
 
     addServerHandler({

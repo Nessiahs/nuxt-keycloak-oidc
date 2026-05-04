@@ -8,6 +8,8 @@ const {
   mockVerifyAccessToken,
   mockAttachAuthContext,
   mockSetTokenCookie,
+  mockGetHeader,
+  mockSetRedirectCookie,
 } = vi.hoisted(() => ({
   mockResolveTokenState: vi.fn(),
   mockResolveRefreshTokenState: vi.fn(),
@@ -15,10 +17,13 @@ const {
   mockVerifyAccessToken: vi.fn(),
   mockAttachAuthContext: vi.fn(),
   mockSetTokenCookie: vi.fn(),
+  mockGetHeader: vi.fn(),
+  mockSetRedirectCookie: vi.fn(),
 }))
 
 vi.mock('h3', () => ({
   defineEventHandler: (fn: any) => fn,
+  getHeader: mockGetHeader,
 }))
 
 vi.mock('../src/runtime/utils/resolveTokenState', () => ({
@@ -42,6 +47,10 @@ vi.mock('../src/runtime/utils/tokenCookie', () => ({
   setTokenCookie: mockSetTokenCookie,
 }))
 
+vi.mock('../src/runtime/utils/setRedirectCookie', () => ({
+  setRedirectCookie: mockSetRedirectCookie,
+}))
+
 describe('session endpoint', () => {
   beforeEach(() => {
     vi.resetModules()
@@ -54,6 +63,7 @@ describe('session endpoint', () => {
         path: '/',
       },
     })
+    mockGetHeader.mockReturnValue(undefined)
   })
 
   it('returns authenticated session from a valid access token', async () => {
@@ -96,6 +106,24 @@ describe('session endpoint', () => {
       authenticated: false,
       user: null,
     })
+    expect(mockSetRedirectCookie).not.toHaveBeenCalled()
+  })
+
+  it('stores the requested SPA route before returning an unauthenticated session', async () => {
+    const event = {} as any
+    mockGetHeader.mockReturnValue('/dashboard?tab=profile#security')
+    mockResolveTokenState.mockResolvedValue({
+      hasAccess: false,
+      hasRefresh: false,
+    })
+
+    const { default: handler } = await import('../src/runtime/server/api/_oidc/session.get')
+
+    await expect(handler(event)).resolves.toEqual({
+      authenticated: false,
+      user: null,
+    })
+    expect(mockSetRedirectCookie).toHaveBeenCalledWith(event, '/dashboard?tab=profile#security')
   })
 
   it('returns unauthenticated session when refresh token validation fails', async () => {
@@ -172,6 +200,7 @@ describe('session endpoint', () => {
         family_name: undefined,
       },
     })
+    expect(mockSetRedirectCookie).not.toHaveBeenCalled()
     expect(mockAttachAuthContext).toHaveBeenCalledWith(
       event,
       expect.objectContaining({ sub: 'user-id' }),
