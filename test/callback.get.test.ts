@@ -356,6 +356,32 @@ describe('auth callback handler', () => {
     expect(h3.sendRedirect).toHaveBeenCalledWith(event, '/')
   })
 
+  it('prevents protocol-relative open redirect', async () => {
+    mockFetch.mockResolvedValue({
+      access_token: 'a',
+      refresh_token: 'r',
+      id_token: 'id',
+      expires_in: 300,
+      refresh_expires_in: 3600,
+    })
+
+    h3.getCookie.mockImplementation((_: unknown, name: string) => {
+      const cookies: Record<string, string> = {
+        kc_state: 'state123',
+        kc_nonce: 'nonce123',
+        kc_verifier: 'verifier123',
+        redirect_to: '//evil.com',
+      }
+      return cookies[name]
+    })
+
+    const event = {} as any
+
+    await handler(event)
+
+    expect(h3.sendRedirect).toHaveBeenCalledWith(event, '/')
+  })
+
   // ---------------------------------------------------------------------------
   // VALID REDIRECT
   // ---------------------------------------------------------------------------

@@ -279,7 +279,7 @@ describe('route registration', () => {
     })
   })
 
-  it('registers keycloak runtime plugin', async () => {
+  it('registers keycloak runtime plugins', async () => {
     const module = await import('../src/module')
 
     await module.default(
@@ -297,9 +297,42 @@ describe('route registration', () => {
       } as any,
     )
 
-    expect(addPluginMock).toHaveBeenCalledTimes(1)
+    expect(addPluginMock).toHaveBeenCalledTimes(2)
 
     expect(addPluginMock).toHaveBeenCalledWith(expect.stringContaining('./runtime/plugin'))
+    expect(addPluginMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        src: expect.stringContaining('./runtime/client-route-protection.client'),
+        mode: 'client',
+      }),
+    )
+  })
+
+  it('exposes only client-safe route protection policy in public runtime config', async () => {
+    const module = await import('../src/module')
+    const nuxt = {
+      options: {
+        runtimeConfig: {},
+      },
+    } as any
+
+    await module.default(
+      {
+        enabled: true,
+        url: 'http://localhost',
+        realm: 'test',
+        clientId: 'client',
+        clientSecret: 'secret',
+        cookieSecret: 'cookie-secret',
+        mode: 'protect-selected',
+      },
+      nuxt,
+    )
+
+    expect(nuxt.options.runtimeConfig.public.keycloak).toEqual({
+      mode: 'protect-selected',
+    })
+    expect(JSON.stringify(nuxt.options.runtimeConfig.public.keycloak)).not.toContain('secret')
   })
 
   it('registers runtime composables for auto-import', async () => {

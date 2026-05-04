@@ -23,6 +23,7 @@ Built for simplicity: configure once, and authentication just works across SSR a
 - 🧩 Global middleware integration (Nuxt-native)
 - 🎯 No need to write your own authentication middleware
 - 🛣️ Route protection via Nuxt routeRules
+- 🧭 Client-side SPA navigation protection
 - 🔁 Flexible protection modes (`protect-all` / `protect-selected`)
 - 🖼️ Protects assets (e.g. images, files) via Nuxt routeRules
 - 🍪 Configurable authentication cookies with optional stateless sealing
@@ -151,6 +152,16 @@ For production clusters, configure the same `NUXT_KEYCLOAK_COOKIE_SECRET` on eve
 The module integrates with Nuxt route rules to control authentication behavior.
 
 This also applies to static assets such as images or files.
+
+Route rules are enforced on the initial SSR request and on client-side SPA navigation. During client-side navigation, the module checks whether the target route is protected and verifies the current session through the server-side session endpoint.
+
+If a client-side navigation targets a protected route after the session expired, the requested route is sent to the session endpoint as a short-lived server-side redirect target. After the Keycloak login completes, the user is redirected back to the originally requested route, including query parameters and hash fragments.
+
+The browser never receives access or refresh tokens. The client route guard only receives an authenticated/unauthenticated session result from:
+
+```text
+GET /api/_oidc/session
+```
 
 ### `protect-all` (default)
 

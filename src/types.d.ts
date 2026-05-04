@@ -14,6 +14,12 @@ declare module 'nuxt/schema' {
   interface RuntimeConfig {
     keycloak: ResolvedModuleOptions
   }
+
+  interface PublicRuntimeConfig {
+    keycloak: {
+      mode: ResolvedModuleOptions['mode']
+    }
+  }
 }
 
 declare module 'nitropack/types' {

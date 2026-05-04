@@ -3,6 +3,7 @@ import type { KeycloakTokenResponse } from '../../types/keycloak.types'
 import { getKeycloakDiscovery } from './keycloakDiscovery'
 import { getHashKey } from './getHashKey'
 import { COOKIE_NAMES } from '../constants/cookies'
+import { HEADER_NAMES, HEADER_VALUES } from '../constants/headers'
 import { getTokenCookie } from './tokenCookie'
 import { getKeycloakConfig } from './getKeycloakConfig'
 
@@ -47,7 +48,7 @@ export async function refreshToken(event: H3Event) {
       return await $fetch<KeycloakTokenResponse>(discovery.token_endpoint, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          [HEADER_NAMES.CONTENT_TYPE]: HEADER_VALUES.FORM_URLENCODED,
         },
         timeout: 5000, // prevent hanging requests
         body,
